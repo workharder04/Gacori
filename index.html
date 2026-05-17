@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="kumo">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,65 +9,196 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@700&display=swap');
 
-    :root { --green: #4a5c3f; }
-    body { font-family: 'Inter', system-ui, sans-serif; }
-    .hero-bg { background: linear-gradient(180deg, #5c6f52 0%, #3f4a37 100%); }
+    /* ── CSS variables (updated per-flavor via JS) ─────── */
+    :root {
+      --hue: 120;
+      --sat: 38;
 
-    /* ── Flavor icon strip ── */
-    .flavor-card { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
-    .flavor-card:hover { transform: scale(1.15) rotate(4deg); box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4); }
-    .active-flavor { box-shadow: 0 0 0 6px #fff, 0 0 0 8px #4a5c3f; transform: scale(1.1); }
-    .active-flavor:hover { transform: scale(1.15) rotate(4deg); }
+      /* Page BG  → 4 shades lighter  (lightness ~91%) */
+      --bg:          hsl(var(--hue), calc(var(--sat) * 0.45%), 91%);
 
-    #flavor-strip {
+      /* Package → 2 shades darker than BG  (lightness ~73%) */
+      --pkg:         hsl(var(--hue), calc(var(--sat) * 0.75%), 73%);
+      --pkg-dark:    hsl(var(--hue), calc(var(--sat) * 0.85%), 63%);
+      --pkg-light:   hsl(var(--hue), calc(var(--sat) * 0.60%), 79%);
+
+      /* Accent for text / ring */
+      --accent:      hsl(var(--hue), calc(var(--sat) * 1.2%), 38%);
+      --accent-soft: hsl(var(--hue), calc(var(--sat) * 0.9%), 55%);
+
+      /* Transition speed */
+      --spd: 0.75s;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--bg);
+      transition: background-color var(--spd) cubic-bezier(.4,0,.2,1);
+      min-height: 100vh;
       display: flex;
-      gap: 2rem;
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    /* ── Drag zone ── */
-    #slide-zone { touch-action: pan-y; cursor: grab; }
-    #slide-zone.dragging { cursor: grabbing; }
+    /* ── Top-level wrapper ── */
+    .page { max-width: 900px; width: 100%; margin: auto; padding: 1.5rem; }
 
-    /* ── Package bounce ── */
-    @keyframes pkgBounce {
-      0%   { transform: scale(0.92) translateY(10px) rotate(-1deg); }
-      55%  { transform: scale(1.04) translateY(-6px) rotate(0.5deg); }
-      100% { transform: scale(1) translateY(0) rotate(0deg); }
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+      color: var(--accent);
+      transition: color var(--spd) ease;
     }
-    .pkg-bounce { animation: pkgBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .topbar a { color: inherit; opacity: .7; font-size: .875rem; text-decoration: none; transition: opacity .2s; }
+    .topbar a:hover { opacity: 1; }
+    .topbar .logo-icon {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 1.1rem;
+      font-weight: 700;
+      transition: background var(--spd) ease, color var(--spd) ease;
+    }
+    .cart-bubble {
+      position: relative; cursor: pointer;
+      color: var(--accent);
+      transition: color var(--spd) ease;
+    }
+    .cart-badge {
+      position: absolute; top: -5px; right: -6px;
+      background: #ef4444; color: #fff;
+      font-size: 9px; width: 16px; height: 16px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    }
 
-    /* ══════════════════════════════════
-       Tea bag / kraft paper package
-    ═══════════════════════════════════ */
+    /* ── Main card ── */
+    .card {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow:
+        0 4px 6px -1px rgba(0,0,0,0.04),
+        0 20px 60px -10px rgba(0,0,0,0.10);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Card header ── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.75rem 2.5rem 0;
+    }
+    .brand-name {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      color: var(--accent);
+      transition: color var(--spd) ease;
+    }
+    .pill-group {
+      display: flex; gap: .5rem;
+      background: rgba(0,0,0,0.04);
+      border-radius: 16px;
+      padding: .4rem;
+    }
+    .pill-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--accent);
+      background: transparent;
+      border: none;
+      font-size: .9rem;
+      transition: background .2s, color var(--spd) ease;
+    }
+    .pill-btn:hover { background: rgba(0,0,0,0.06); }
+    .location-chip {
+      display: flex; align-items: center; gap: .4rem;
+      background: rgba(0,0,0,0.05);
+      border-radius: 50px;
+      padding: .5rem 1.1rem;
+      font-size: .8rem;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      transition: color var(--spd) ease, background .2s;
+    }
+    .location-chip:hover { background: rgba(0,0,0,0.09); }
+
+    /* ── Product scene ── */
+    .scene {
+      position: relative;
+      height: 500px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 3rem;
+      cursor: grab;
+      user-select: none;
+    }
+    .scene.dragging { cursor: grabbing; }
+
+    /* Soft coloured glow behind the package */
+    .scene-glow {
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 340px; height: 200px;
+      background: radial-gradient(ellipse at center,
+        var(--pkg-light) 0%,
+        transparent 70%);
+      border-radius: 50%;
+      opacity: .55;
+      transition: background var(--spd) ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Package ────────────────────────────────────────── */
     .package-scene {
       position: relative;
-      width: 220px;
-      height: 360px;
-      filter: drop-shadow(0 40px 60px rgba(0,0,0,0.55));
+      width: 210px;
+      height: 340px;
+      z-index: 5;
+      filter: drop-shadow(0 32px 48px rgba(0,0,0,0.18));
     }
 
-    /* Background bags (depth) */
+    /* Back bags */
     .bg-bag {
       position: absolute;
       bottom: 0;
-      width: 170px;
-      height: 300px;
-      background: #b8926a;
+      width: 165px;
+      height: 290px;
       border-radius: 6px 6px 14px 14px;
-      opacity: 0.6;
+      background-color: var(--pkg-dark);
+      transition: background-color var(--spd) ease;
+      opacity: .50;
     }
-    .bg-bag-left  { left: -30px;  transform: rotate(-8deg) translateY(18px); z-index: 1; }
-    .bg-bag-right { right: -30px; transform: rotate(8deg)  translateY(18px); z-index: 1; }
-
     .bg-bag::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 52px;
-      background: #a07d58;
+      height: 50px;
+      background-color: var(--pkg-dark);
+      filter: brightness(.88);
       border-radius: 6px 6px 0 0;
+      transition: background-color var(--spd) ease;
     }
+    .bg-bag-left  { left: -25px; transform: rotate(-7deg) translateY(16px); z-index: 1; }
+    .bg-bag-right { right: -25px; transform: rotate(7deg)  translateY(16px); z-index: 1; }
 
     /* Main bag */
     .tea-bag {
@@ -75,544 +206,671 @@
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
-      width: 190px;
+      width: 188px;
       z-index: 10;
     }
 
-    /* Top sealed fold */
+    /* Top fold */
     .bag-top {
       width: 100%;
-      height: 58px;
-      background: linear-gradient(180deg, #c8a070 0%, #b8906a 100%);
+      height: 56px;
+      background-color: var(--pkg-dark);
       border-radius: 7px 7px 0 0;
       position: relative;
       overflow: hidden;
+      transition: background-color var(--spd) ease;
     }
-    /* fold crease lines */
-    .bag-top::before {
+    .bag-top::after {
       content: '';
       position: absolute;
       bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 130px; height: 2px;
-      background: rgba(0,0,0,0.12);
+      width: 128px; height: 1.5px;
+      background: rgba(0,0,0,0.1);
       border-radius: 2px;
     }
-    /* notch at top centre */
+
+    /* Notch */
     .bag-notch {
       position: absolute;
       top: 10px; left: 50%; transform: translateX(-50%);
-      width: 44px; height: 34px;
-      background: #d4ad80;
-      border-radius: 4px 4px 0 0;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.2);
+      width: 42px; height: 32px;
+      border-radius: 5px 5px 0 0;
+      background-color: var(--pkg-light);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.14);
+      transition: background-color var(--spd) ease;
     }
     .bag-notch::after {
       content: '';
       position: absolute;
-      inset: 4px 4px 0 4px;
-      background: linear-gradient(180deg, #e8c090, #c89060);
-      border-radius: 2px 2px 0 0;
+      inset: 4px 4px 0;
+      background-color: var(--pkg);
+      border-radius: 3px 3px 0 0;
+      filter: brightness(1.1);
+      transition: background-color var(--spd) ease;
     }
 
     /* Bag body */
     .bag-body {
       width: 100%;
-      height: 290px;
-      background: linear-gradient(170deg, #d4aa78 0%, #c49060 40%, #b87f50 100%);
+      height: 284px;
+      background-color: var(--pkg);
       border-radius: 0 0 14px 14px;
       position: relative;
       overflow: hidden;
+      transition: background-color var(--spd) ease;
     }
-    /* Side crease shadows */
+    /* Side crease shading */
     .bag-body::before {
       content: '';
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       background:
-        linear-gradient(to right, rgba(0,0,0,0.18) 0%, transparent 18%),
-        linear-gradient(to left,  rgba(0,0,0,0.18) 0%, transparent 18%);
+        linear-gradient(to right, rgba(0,0,0,0.13) 0%, transparent 20%),
+        linear-gradient(to left,  rgba(0,0,0,0.13) 0%, transparent 20%);
       pointer-events: none;
       z-index: 5;
+      border-radius: 0 0 14px 14px;
+    }
+    /* Subtle highlight centre */
+    .bag-body::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 4;
     }
 
-    /* Illustrated front panel */
+    /* Illustration panel */
     .bag-panel {
       position: absolute;
       top: 12px; left: 10px; right: 10px;
-      height: 218px;
+      height: 214px;
       border-radius: 5px;
       overflow: hidden;
       z-index: 2;
+      background: rgba(255,255,255,0.22);
     }
-    .bag-panel svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      transition: none;
-    }
+    .bag-panel svg { width: 100%; height: 100%; display: block; }
 
-    /* Small text label sticker */
+    /* Label sticker */
     .bag-label {
       position: absolute;
       bottom: 12px; left: 10px; right: 10px;
-      background: rgba(255,255,255,0.82);
-      border-radius: 4px;
+      background: rgba(255,255,255,0.78);
+      border-radius: 5px;
       padding: 5px 8px;
-      z-index: 3;
-      backdrop-filter: blur(4px);
+      z-index: 6;
+      backdrop-filter: blur(6px);
     }
     .bag-label-name {
       font-family: 'Noto Serif SC', serif;
-      font-size: 10px;
-      color: #3a4a2f;
+      font-size: 9.5px;
+      color: var(--accent);
       font-weight: 700;
-      letter-spacing: 0.05em;
+      letter-spacing: .05em;
       display: block;
+      transition: color var(--spd) ease;
     }
-    .bag-label-sub {
-      font-size: 8px;
-      color: #6a7a5f;
-      letter-spacing: 0.04em;
-    }
+    .bag-label-sub { font-size: 8px; color: #888; letter-spacing: .04em; }
 
-    /* Shadow under the bag */
+    /* Ground shadow */
     .bag-shadow-base {
       position: absolute;
-      bottom: -12px; left: 50%;
+      bottom: -14px; left: 50%;
       transform: translateX(-50%);
-      width: 300px; height: 36px;
-      background: radial-gradient(ellipse, rgba(0,0,0,0.45) 0%, transparent 70%);
+      width: 260px; height: 32px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.22) 0%, transparent 70%);
       z-index: 0;
     }
+
+    /* ── Package bounce ── */
+    @keyframes pkgBounce {
+      0%   { transform: scale(.92) translateY(10px); }
+      55%  { transform: scale(1.04) translateY(-5px); }
+      100% { transform: scale(1)   translateY(0); }
+    }
+    .pkg-bounce { animation: pkgBounce .5s cubic-bezier(.4,0,.2,1) forwards; }
+
+    /* ── Flavor strip ── */
+    .strip-wrap {
+      position: absolute;
+      bottom: 6.5rem;
+      left: 0; right: 0;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      z-index: 20;
+    }
+    #flavor-strip {
+      display: flex;
+      gap: 1.25rem;
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .flavor-card {
+      width: 72px; height: 72px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.85);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 2.2rem;
+      flex-shrink: 0;
+      transition: transform .35s cubic-bezier(.4,0,.2,1),
+                  box-shadow .35s ease,
+                  outline-color var(--spd) ease;
+      outline: 3px solid transparent;
+      outline-offset: 3px;
+    }
+    .flavor-card:hover { transform: scale(1.12) rotate(4deg); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
+    .active-flavor {
+      outline: 3px solid var(--accent);
+      transform: scale(1.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+      transition: outline-color var(--spd) ease, transform .35s ease, box-shadow .35s ease;
+    }
+    .active-flavor:hover { transform: scale(1.14) rotate(3deg); }
+
+    /* ── Product label block ── */
+    .product-label {
+      position: absolute;
+      bottom: 10.5rem;
+      left: 50%; transform: translateX(-50%);
+      text-align: center;
+      z-index: 30;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .product-label h2 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -.025em;
+      color: var(--accent);
+      transition: color var(--spd) ease;
+      line-height: 1;
+    }
+    .price-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: var(--accent);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 700;
+      padding: .45rem 1.1rem;
+      border-radius: 50px;
+      margin-top: .7rem;
+      pointer-events: auto;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+      transition: background var(--spd) ease, box-shadow .2s;
+    }
+    .price-chip:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+
+    /* ── Bottom headline ── */
+    .scene-headline {
+      position: absolute;
+      bottom: 1.25rem;
+      left: 50%; transform: translateX(-50%);
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--accent-soft);
+      opacity: .7;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: color var(--spd) ease;
+    }
+
+    /* ── Footer hint ── */
+    .hint {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: .75rem;
+      color: var(--accent);
+      opacity: .45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      transition: color var(--spd) ease;
+    }
+    .hint-divider { width: 1px; height: 10px; background: currentColor; opacity: .4; }
+    .hint span.reset { cursor: pointer; opacity: .5; }
+    .hint span.reset:hover { opacity: .85; }
   </style>
 </head>
-<body class="bg-[#4a5c3f] text-white min-h-screen flex items-center justify-center overflow-hidden">
-  <div class="max-w-5xl w-full mx-auto p-6">
+<body>
+<div class="page">
 
-    <!-- Top Bar -->
-    <div class="flex items-center justify-between mb-8">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-[#4a5c3f] font-bold text-xl">📖</div>
-        <span class="font-semibold tracking-wider">CASE UI/UX</span>
-      </div>
-      <div class="flex items-center gap-8 text-sm">
-        <a href="#" class="hover:text-white/70 transition-colors">Shop</a>
-        <a href="#" class="hover:text-white/70 transition-colors">Menu</a>
-        <a href="#" class="hover:text-white/70 transition-colors">Locations</a>
-      </div>
-      <div class="flex items-center gap-6">
-        <div class="flex gap-4">
-          <i class="fa-brands fa-instagram cursor-pointer hover:scale-110 transition"></i>
-          <i class="fa-brands fa-tiktok cursor-pointer hover:scale-110 transition"></i>
-          <i class="fa-brands fa-x-twitter cursor-pointer hover:scale-110 transition"></i>
-        </div>
-        <div onclick="toggleCart()" class="relative cursor-pointer">
-          <i class="fa-solid fa-cart-shopping text-2xl"></i>
-          <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[10px] w-4 h-4 rounded-full flex items-center justify-center">1</span>
-        </div>
-        <div class="text-sm font-medium">KRIS ANFALOVA <span class="text-red-400">♥</span></div>
-      </div>
+  <!-- ── Top bar ── -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:.6rem;">
+      <div class="logo-icon">📖</div>
+      <span style="font-weight:600;letter-spacing:.07em;font-size:.85rem;">CASE UI/UX</span>
     </div>
 
-    <!-- Main Card -->
-    <div class="hero-bg rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
-
-      <!-- Header row -->
-      <div class="flex items-center justify-between px-10 pt-8">
-        <span class="text-4xl font-bold tracking-tighter">kumo</span>
-        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl">
-          <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-solid fa-grip"></i></div>
-          <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-brands fa-instagram"></i></div>
-          <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-brands fa-x-twitter"></i></div>
-          <div onclick="toggleCart()" class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition relative">
-            <i class="fa-solid fa-cart-shopping"></i>
-            <span id="mini-cart" class="absolute -top-1 -right-1 bg-white text-[#4a5c3f] text-[10px] px-1.5 rounded-full font-bold">1</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-3 rounded-3xl cursor-pointer">
-          <i class="fa-solid fa-location-dot"></i>
-          <span class="text-sm font-medium">Gurugram</span>
-        </div>
-      </div>
-
-      <!-- ── Product Scene (drag zone) ── -->
-      <div id="slide-zone" class="relative h-[520px] flex items-end justify-center px-12 pb-12 select-none">
-
-        <!-- ── Tea Package ── -->
-        <div id="package" class="package-scene">
-          <!-- Depth bags -->
-          <div class="bg-bag bg-bag-left"></div>
-          <div class="bg-bag bg-bag-right"></div>
-
-          <!-- Main bag -->
-          <div class="tea-bag">
-            <div class="bag-top">
-              <div class="bag-notch"></div>
-            </div>
-            <div class="bag-body">
-              <!-- Illustration -->
-              <div class="bag-panel">
-                <svg id="bag-art" viewBox="0 0 170 218" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-                  <!-- Sky -->
-                  <defs>
-                    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop id="sky1" offset="0%" stop-color="#e8e0d0"/>
-                      <stop id="sky2" offset="100%" stop-color="#d4e8c8"/>
-                    </linearGradient>
-                    <linearGradient id="mtn1Grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop id="m1a" offset="0%" stop-color="#7aaa88"/>
-                      <stop id="m1b" offset="100%" stop-color="#4a7a5a"/>
-                    </linearGradient>
-                    <linearGradient id="mtn2Grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop id="m2a" offset="0%" stop-color="#3a6a5a"/>
-                      <stop id="m2b" offset="100%" stop-color="#1e4a3a"/>
-                    </linearGradient>
-                    <linearGradient id="mtn3Grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop id="m3a" offset="0%" stop-color="#2a5040"/>
-                      <stop id="m3b" offset="100%" stop-color="#0e2e22"/>
-                    </linearGradient>
-                  </defs>
-
-                  <!-- Sky background -->
-                  <rect width="170" height="218" fill="url(#skyGrad)"/>
-
-                  <!-- Sun / moon circle -->
-                  <circle id="sun" cx="130" cy="38" r="16" fill="#f0d890" opacity="0.85"/>
-
-                  <!-- Birds (small silhouettes) -->
-                  <g id="birds" fill="#4a5040" opacity="0.55">
-                    <path d="M42,32 Q45,28 48,32 Q51,28 54,32" stroke="#4a5040" stroke-width="1.2" fill="none"/>
-                    <path d="M60,22 Q63,18 66,22 Q69,18 72,22" stroke="#4a5040" stroke-width="1.1" fill="none"/>
-                    <path d="M78,38 Q80,35 82,38 Q84,35 86,38" stroke="#4a5040" stroke-width="1" fill="none"/>
-                    <path d="M95,28 Q97,25 99,28 Q101,25 103,28" stroke="#4a5040" stroke-width="0.9" fill="none"/>
-                  </g>
-
-                  <!-- Far mountains layer 1 -->
-                  <path id="mtn1" d="M0,105 Q20,65 45,90 Q65,55 90,85 Q110,60 135,80 Q152,65 170,75 L170,218 L0,218 Z" fill="url(#mtn1Grad)" opacity="0.7"/>
-
-                  <!-- Mid mountains layer 2 -->
-                  <path id="mtn2" d="M0,130 Q25,95 55,118 Q80,88 110,112 Q135,92 160,108 L170,102 L170,218 L0,218 Z" fill="url(#mtn2Grad)"/>
-
-                  <!-- Foreground ridge -->
-                  <path id="mtn3" d="M0,158 Q35,138 70,152 Q105,136 145,150 Q158,144 170,148 L170,218 L0,218 Z" fill="url(#mtn3Grad)"/>
-
-                  <!-- Bamboo stalks left -->
-                  <g id="bamboo" opacity="0.9">
-                    <!-- stalk 1 -->
-                    <rect x="8"  y="95"  width="4" height="123" rx="2" fill="#3a6a30"/>
-                    <rect x="8"  y="110" width="14" height="2"  rx="1" fill="#2e5428"/>
-                    <rect x="8"  y="128" width="14" height="2"  rx="1" fill="#2e5428"/>
-                    <rect x="8"  y="146" width="14" height="2"  rx="1" fill="#2e5428"/>
-                    <rect x="8"  y="164" width="14" height="2"  rx="1" fill="#2e5428"/>
-                    <!-- leaves on stalk 1 -->
-                    <path d="M12,112 Q28,100 22,114 Z" fill="#4a8a3a"/>
-                    <path d="M12,130 Q-4,118 6,132 Z"  fill="#4a8a3a"/>
-                    <path d="M12,148 Q30,138 20,152 Z" fill="#4a8a3a"/>
-                    <!-- stalk 2 -->
-                    <rect x="22" y="108" width="3.5" height="110" rx="1.5" fill="#4a7a38"/>
-                    <rect x="22" y="120" width="12"  height="1.5" rx="1" fill="#3a6030"/>
-                    <rect x="22" y="135" width="12"  height="1.5" rx="1" fill="#3a6030"/>
-                    <rect x="22" y="150" width="12"  height="1.5" rx="1" fill="#3a6030"/>
-                    <path d="M25,122 Q38,112 32,124 Z" fill="#5a9a48"/>
-                    <path d="M25,137 Q12,128 18,140 Z" fill="#5a9a48"/>
-                  </g>
-
-                  <!-- Foreground grass tufts -->
-                  <g id="grass" fill="#2a5a30">
-                    <path d="M0,218 Q5,185 2,175 Q8,188 12,178 Q10,192 15,218 Z" opacity="0.9"/>
-                    <path d="M10,218 Q18,190 15,182 Q22,195 28,183 Q24,198 30,218 Z" opacity="0.85"/>
-                    <path d="M140,218 Q145,192 142,184 Q150,196 156,186 Q152,200 158,218 Z" opacity="0.9"/>
-                    <path d="M155,218 Q160,196 158,188 Q165,200 170,190 L170,218 Z" opacity="0.85"/>
-                    <!-- Central taller grass -->
-                    <path d="M72,218 Q76,195 74,188 Q80,200 84,192 Q82,205 88,218 Z" opacity="0.8"/>
-                    <path d="M88,218 Q92,200 90,193 Q96,204 100,196 Q97,208 103,218 Z" opacity="0.8"/>
-                  </g>
-
-                  <!-- Calligraphy text -->
-                  <g id="calli" font-family="'Noto Serif SC', serif" fill="#2a3a28" opacity="0.75">
-                    <text x="148" y="70"  font-size="11" font-weight="700" writing-mode="tb">山</text>
-                    <text x="148" y="82"  font-size="11" font-weight="700" writing-mode="tb">響</text>
-                    <text x="148" y="94"  font-size="11" font-weight="700" writing-mode="tb">韻</text>
-                  </g>
-
-                  <!-- Subtle paper texture overlay -->
-                  <rect width="170" height="218" fill="url(#paperTex)" opacity="0.06"/>
-                </svg>
-              </div>
-
-              <!-- Product label sticker -->
-              <div class="bag-label">
-                <span class="bag-label-name">山響韻 · <span id="bag-label-name">Original Matcha</span></span>
-                <span class="bag-label-sub">Premium · 50g · <span id="bag-label-price">¥19.33</span></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Ground shadow -->
-          <div class="bag-shadow-base"></div>
-        </div>
-
-        <!-- Flavor icon strip -->
-        <div class="absolute bottom-28 left-0 right-0 overflow-hidden flex justify-center z-20">
-          <div id="flavor-strip">
-            <div onclick="selectFlavor(0)" id="flavor-0" class="flavor-card active-flavor bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍵</span></div>
-            <div onclick="selectFlavor(1)" id="flavor-1" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍓</span></div>
-            <div onclick="selectFlavor(2)" id="flavor-2" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🫐</span></div>
-            <div onclick="selectFlavor(3)" id="flavor-3" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍒</span></div>
-            <div onclick="selectFlavor(4)" id="flavor-4" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍇</span></div>
-          </div>
-        </div>
-
-        <!-- Product name + price -->
-        <div class="absolute bottom-36 left-1/2 -translate-x-1/2 text-center z-30 pointer-events-none">
-          <div id="flavor-name" class="text-5xl font-bold tracking-tighter text-white drop-shadow-md transition-all duration-300">Original</div>
-          <div class="flex items-center justify-center gap-2 mt-3">
-            <div class="bg-white text-[#3a4a20] text-xs font-bold px-4 py-2 rounded-2xl flex items-center gap-2 shadow pointer-events-auto">
-              <i class="fa-solid fa-cart-plus"></i>
-              <span id="price">19.33</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom headline -->
-        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-4xl font-bold tracking-widest text-white/90 pointer-events-none whitespace-nowrap">
-          Choose your matcha tea
-        </div>
-      </div>
+    <div style="display:flex;gap:2rem;">
+      <a href="#">Shop</a>
+      <a href="#">Menu</a>
+      <a href="#">Locations</a>
     </div>
 
-    <!-- Footer hint -->
-    <div class="text-center mt-6 text-white/40 text-sm flex items-center justify-center gap-2">
-      <i class="fa-solid fa-arrows-left-right text-xs"></i>
-      <span>Drag left/right &nbsp;·&nbsp; ← → arrow keys &nbsp;·&nbsp; click a flavor</span>
-      <div class="w-px h-3 bg-white/30"></div>
-      <span class="cursor-pointer hover:text-white/70" onclick="selectFlavor(0)">Reset</span>
+    <div style="display:flex;align-items:center;gap:1.25rem;">
+      <div style="display:flex;gap:.9rem;font-size:.95rem;color:var(--accent);transition:color var(--spd) ease;">
+        <i class="fa-brands fa-instagram" style="cursor:pointer;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"></i>
+        <i class="fa-brands fa-tiktok"    style="cursor:pointer;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"></i>
+        <i class="fa-brands fa-x-twitter" style="cursor:pointer;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"></i>
+      </div>
+      <div class="cart-bubble" onclick="toggleCart()">
+        <i class="fa-solid fa-cart-shopping" style="font-size:1.3rem;"></i>
+        <span id="cart-count" class="cart-badge">1</span>
+      </div>
+      <span style="font-size:.8rem;font-weight:600;color:var(--accent);transition:color var(--spd) ease;">
+        KRIS <span style="color:#ef4444;">♥</span>
+      </span>
     </div>
   </div>
 
-  <script>
-  (() => {
-    /* ── Flavor definitions ─────────────────────────────────
-       Each flavor tints the SVG illustration with a palette:
-       sky1/sky2  → background sky gradient
-       sun        → circle colour
-       m1a/m1b    → far mountains
-       m2a/m2b    → mid mountains
-       m3a/m3b    → foreground ridge
-       bamboo/grass → plant colour  (via SVG fill attributes)
-    ─────────────────────────────────────────────────────── */
-    const flavors = [
-      {
-        name: "Original", emoji: "🍵", price: "19.33",
-        label: "Original Matcha",
-        sky1: "#e8e0d0", sky2: "#d4e8c8",
-        sun: "#f0d890",
-        m1a: "#7aaa88", m1b: "#4a7a5a",
-        m2a: "#3a6a5a", m2b: "#1e4a3a",
-        m3a: "#2a5040", m3b: "#0e2e22",
-        birds: "#4a5040",
-        bamboo: "#3a6a30", grass: "#2a5a30",
-      },
-      {
-        name: "Strawberry", emoji: "🍓", price: "21.50",
-        label: "Strawberry Matcha",
-        sky1: "#f5e0dc", sky2: "#f8cdd5",
-        sun: "#f8b0a0",
-        m1a: "#d07888", m1b: "#a04858",
-        m2a: "#883058", m2b: "#5a1838",
-        m3a: "#6a1840", m3b: "#3a0820",
-        birds: "#7a3040",
-        bamboo: "#8a3050", grass: "#6a2040",
-      },
-      {
-        name: "Blueberry", emoji: "🫐", price: "22.00",
-        label: "Blueberry Matcha",
-        sky1: "#dce4f0", sky2: "#c8d8f0",
-        sun: "#a8c0f0",
-        m1a: "#6888c0", m1b: "#3858a0",
-        m2a: "#2848a0", m2b: "#103080",
-        m3a: "#1a3080", m3b: "#081858",
-        birds: "#303878",
-        bamboo: "#284890", grass: "#1a3070",
-      },
-      {
-        name: "Cherry", emoji: "🍒", price: "20.75",
-        label: "Cherry Matcha",
-        sky1: "#f0dce8", sky2: "#e8c8d8",
-        sun: "#f0a0c0",
-        m1a: "#c068a0", m1b: "#904870",
-        m2a: "#783068", m2b: "#501848",
-        m3a: "#5a1858", m3b: "#300830",
-        birds: "#6a2858",
-        bamboo: "#802868", grass: "#601850",
-      },
-      {
-        name: "Matcha Berry", emoji: "🍇", price: "23.00",
-        label: "Matcha Berry Blend",
-        sky1: "#dce8d8", sky2: "#c8e0e8",
-        sun: "#a0d8b8",
-        m1a: "#50a078", m1b: "#287858",
-        m2a: "#306888", m2b: "#184868",
-        m3a: "#1e5060", m3b: "#0a2838",
-        birds: "#284850",
-        bamboo: "#287860", grass: "#1e5848",
-      },
-    ];
+  <!-- ── Main card ── -->
+  <div class="card">
 
-    let current = 0;
-    let cartCount = 1;
+    <!-- Card header -->
+    <div class="card-header">
+      <span class="brand-name">kumo</span>
 
-    const flavorName  = document.getElementById('flavor-name');
-    const priceEl     = document.getElementById('price');
-    const bagLabelName = document.getElementById('bag-label-name');
-    const bagLabelPrice = document.getElementById('bag-label-price');
-    const pkg         = document.getElementById('package');
-    const strip       = document.getElementById('flavor-strip');
-    const zone        = document.getElementById('slide-zone');
-    const cartCountEl = document.getElementById('cart-count');
-    const miniCart    = document.getElementById('mini-cart');
+      <div class="pill-group">
+        <button class="pill-btn"><i class="fa-solid fa-grip"></i></button>
+        <button class="pill-btn"><i class="fa-brands fa-instagram"></i></button>
+        <button class="pill-btn"><i class="fa-brands fa-x-twitter"></i></button>
+        <button class="pill-btn" onclick="toggleCart()" style="position:relative;">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span id="mini-cart" style="position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:9px;padding:1px 4px;border-radius:50px;font-weight:700;transition:background var(--spd) ease;">1</span>
+        </button>
+      </div>
 
-    // SVG gradient stops
-    function stop(id) { return document.getElementById(id); }
+      <div class="location-chip">
+        <i class="fa-solid fa-location-dot" style="font-size:.75rem;"></i>
+        <span>Gurugram</span>
+      </div>
+    </div>
 
-    function applyPalette(f) {
-      // Sky
-      stop('sky1').setAttribute('stop-color', f.sky1);
-      stop('sky2').setAttribute('stop-color', f.sky2);
-      // Sun
-      document.getElementById('sun').setAttribute('fill', f.sun);
-      // Mountains
-      stop('m1a').setAttribute('stop-color', f.m1a);
-      stop('m1b').setAttribute('stop-color', f.m1b);
-      stop('m2a').setAttribute('stop-color', f.m2a);
-      stop('m2b').setAttribute('stop-color', f.m2b);
-      stop('m3a').setAttribute('stop-color', f.m3a);
-      stop('m3b').setAttribute('stop-color', f.m3b);
-      // Birds
-      document.getElementById('birds').setAttribute('fill', f.birds);
-      document.querySelectorAll('#birds path').forEach(p => {
-        p.setAttribute('stroke', f.birds);
-      });
-      // Bamboo
-      document.querySelectorAll('#bamboo rect, #bamboo path').forEach(el => {
-        const base = el.tagName === 'rect' ? f.bamboo : f.bamboo;
-        el.setAttribute('fill', base);
-      });
-      // Grass
-      document.querySelectorAll('#grass path').forEach(el => {
-        el.setAttribute('fill', f.grass);
-      });
+    <!-- ── Product scene ── -->
+    <div class="scene" id="slide-zone">
+
+      <!-- Coloured glow behind package -->
+      <div class="scene-glow"></div>
+
+      <!-- ── Tea Package ── -->
+      <div class="package-scene" id="package">
+
+        <!-- Depth bags -->
+        <div class="bg-bag bg-bag-left"></div>
+        <div class="bg-bag bg-bag-right"></div>
+
+        <!-- Hero bag -->
+        <div class="tea-bag">
+          <div class="bag-top">
+            <div class="bag-notch"></div>
+          </div>
+          <div class="bag-body">
+            <!-- Illustration -->
+            <div class="bag-panel">
+              <svg id="bag-art" viewBox="0 0 168 214" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                  <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="sky1" offset="0%"   stop-color="#e8e0d0"/>
+                    <stop id="sky2" offset="100%" stop-color="#d4e8c8"/>
+                  </linearGradient>
+                  <linearGradient id="m1G" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="m1a" offset="0%"   stop-color="#7aaa88"/>
+                    <stop id="m1b" offset="100%" stop-color="#4a7a5a"/>
+                  </linearGradient>
+                  <linearGradient id="m2G" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="m2a" offset="0%"   stop-color="#3a6a5a"/>
+                    <stop id="m2b" offset="100%" stop-color="#1e4a3a"/>
+                  </linearGradient>
+                  <linearGradient id="m3G" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="m3a" offset="0%"   stop-color="#2a5040"/>
+                    <stop id="m3b" offset="100%" stop-color="#0e2e22"/>
+                  </linearGradient>
+                </defs>
+
+                <rect width="168" height="214" fill="url(#skyG)"/>
+
+                <circle id="sun" cx="128" cy="36" r="15" fill="#f0d890" opacity=".85"/>
+
+                <!-- Birds -->
+                <g id="birds" fill="none" stroke="#4a5040" stroke-width="1.2" opacity=".5">
+                  <path d="M40,30 Q43,26 46,30 Q49,26 52,30"/>
+                  <path d="M58,20 Q61,17 64,20 Q67,17 70,20"/>
+                  <path d="M76,36 Q78,33 80,36 Q82,33 84,36"/>
+                  <path d="M93,26 Q95,23 97,26 Q99,23 101,26"/>
+                </g>
+
+                <!-- Mountains -->
+                <path id="mtn1" d="M0,104 Q20,64 44,88 Q63,54 88,84 Q108,58 133,78 Q150,64 168,74 L168,214 L0,214 Z" fill="url(#m1G)" opacity=".7"/>
+                <path id="mtn2" d="M0,128 Q24,94 54,116 Q78,86 108,110 Q132,90 158,106 L168,100 L168,214 L0,214 Z" fill="url(#m2G)"/>
+                <path id="mtn3" d="M0,156 Q34,136 68,150 Q103,134 143,148 Q156,142 168,146 L168,214 L0,214 Z" fill="url(#m3G)"/>
+
+                <!-- Bamboo -->
+                <g id="bamboo">
+                  <rect x="7"  y="94"  width="4"  height="120" rx="2"   fill="#3a6a30"/>
+                  <rect x="7"  y="108" width="13" height="1.8" rx="1"   fill="#2e5428"/>
+                  <rect x="7"  y="126" width="13" height="1.8" rx="1"   fill="#2e5428"/>
+                  <rect x="7"  y="144" width="13" height="1.8" rx="1"   fill="#2e5428"/>
+                  <rect x="7"  y="162" width="13" height="1.8" rx="1"   fill="#2e5428"/>
+                  <path d="M11,110 Q27,98 21,112 Z"  fill="#4a8a3a"/>
+                  <path d="M11,128 Q-3,116 6,130 Z"  fill="#4a8a3a"/>
+                  <path d="M11,146 Q29,136 19,150 Z" fill="#4a8a3a"/>
+                  <rect x="21" y="106" width="3.5" height="108" rx="1.5" fill="#4a7a38"/>
+                  <rect x="21" y="118" width="11"  height="1.5" rx="1"   fill="#3a6030"/>
+                  <rect x="21" y="133" width="11"  height="1.5" rx="1"   fill="#3a6030"/>
+                  <rect x="21" y="148" width="11"  height="1.5" rx="1"   fill="#3a6030"/>
+                  <path d="M24,120 Q37,110 31,122 Z" fill="#5a9a48"/>
+                  <path d="M24,135 Q11,126 17,138 Z" fill="#5a9a48"/>
+                </g>
+
+                <!-- Grass -->
+                <g id="grass" fill="#2a5a30">
+                  <path d="M0,214 Q5,183 2,173 Q8,186 12,176 Q10,190 15,214 Z"/>
+                  <path d="M10,214 Q18,188 15,180 Q22,193 28,181 Q24,196 30,214 Z"/>
+                  <path d="M138,214 Q143,190 140,182 Q148,194 154,184 Q150,198 156,214 Z"/>
+                  <path d="M153,214 Q158,194 156,186 Q163,198 168,188 L168,214 Z"/>
+                  <path d="M70,214 Q75,193 73,186 Q79,198 83,190 Q81,203 87,214 Z"/>
+                  <path d="M86,214 Q91,198 89,191 Q95,202 99,194 Q96,206 102,214 Z"/>
+                </g>
+
+                <!-- Calligraphy -->
+                <g font-family="'Noto Serif SC',serif" font-size="11" font-weight="700"
+                   fill="#2a3a28" opacity=".7">
+                  <text x="147" y="68"  writing-mode="tb">山</text>
+                  <text x="147" y="80"  writing-mode="tb">響</text>
+                  <text x="147" y="92"  writing-mode="tb">韻</text>
+                </g>
+
+                <!-- Paper-grain overlay -->
+                <rect width="168" height="214" fill="rgba(255,255,255,0.07)"/>
+              </svg>
+            </div>
+
+            <!-- Sticker label -->
+            <div class="bag-label">
+              <span class="bag-label-name">山響韻 · <span id="bag-label-name">Original Matcha</span></span>
+              <span class="bag-label-sub">Premium · 50 g · <span id="bag-label-price">¥19.33</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bag-shadow-base"></div>
+      </div>
+      <!-- /package-scene -->
+
+      <!-- Flavor strip -->
+      <div class="strip-wrap">
+        <div id="flavor-strip">
+          <div onclick="selectFlavor(0)" id="flavor-0" class="flavor-card active-flavor"><span>🍵</span></div>
+          <div onclick="selectFlavor(1)" id="flavor-1" class="flavor-card"><span>🍓</span></div>
+          <div onclick="selectFlavor(2)" id="flavor-2" class="flavor-card"><span>🫐</span></div>
+          <div onclick="selectFlavor(3)" id="flavor-3" class="flavor-card"><span>🍒</span></div>
+          <div onclick="selectFlavor(4)" id="flavor-4" class="flavor-card"><span>🍇</span></div>
+        </div>
+      </div>
+
+      <!-- Product name / price -->
+      <div class="product-label">
+        <h2 id="flavor-name">Original</h2>
+        <div class="price-chip" onclick="toggleCart()">
+          <i class="fa-solid fa-cart-plus"></i>
+          <span id="price">19.33</span>
+        </div>
+      </div>
+
+      <!-- Bottom headline -->
+      <div class="scene-headline">Choose your matcha tea</div>
+    </div>
+    <!-- /scene -->
+
+  </div>
+  <!-- /card -->
+
+  <!-- Hint -->
+  <div class="hint">
+    <i class="fa-solid fa-arrows-left-right" style="font-size:.7rem;"></i>
+    <span>Drag left/right</span>
+    <div class="hint-divider"></div>
+    <span>← → arrow keys</span>
+    <div class="hint-divider"></div>
+    <span>click a flavor</span>
+    <div class="hint-divider"></div>
+    <span class="reset" onclick="selectFlavor(0)">Reset</span>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ─────────────────────────────────────────
+     Flavors
+     hue/sat define the base colour.
+     BG  = hsl(hue, sat*0.42%, 91%)   ← 4 shades lighter
+     Pkg = hsl(hue, sat*0.72%, 73%)   ← 2 shades darker than BG
+  ───────────────────────────────────────── */
+  const flavors = [
+    {
+      name: "Original",  emoji: "🍵", price: "19.33", label: "Original Matcha",
+      hue: 120, sat: 40,
+      sky1: "#e8efe0", sky2: "#d0e8c0", sun: "#e8d878",
+      m1a: "#78aa80", m1b: "#487858",
+      m2a: "#386858", m2b: "#1c4838",
+      m3a: "#284e3e", m3b: "#0c2c20",
+      birds: "#3a4e38",
+    },
+    {
+      name: "Strawberry", emoji: "🍓", price: "21.50", label: "Strawberry Matcha",
+      hue: 348, sat: 68,
+      sky1: "#f8e4e2", sky2: "#f5cdd0", sun: "#f4a8a0",
+      m1a: "#d07880", m1b: "#a04858",
+      m2a: "#882f55", m2b: "#581835",
+      m3a: "#68183e", m3b: "#380820",
+      birds: "#7a3040",
+    },
+    {
+      name: "Blueberry",  emoji: "🫐", price: "22.00", label: "Blueberry Matcha",
+      hue: 222, sat: 58,
+      sky1: "#dce8f5", sky2: "#c8d8f5", sun: "#a0bcf0",
+      m1a: "#6488c8", m1b: "#3858a8",
+      m2a: "#2848a5", m2b: "#103082",
+      m3a: "#1a3082", m3b: "#081858",
+      birds: "#303880",
+    },
+    {
+      name: "Cherry",  emoji: "🍒", price: "20.75", label: "Cherry Matcha",
+      hue: 288, sat: 46,
+      sky1: "#f0ddf0", sky2: "#e8cae8", sun: "#f0a8d0",
+      m1a: "#c068a8", m1b: "#904878",
+      m2a: "#782868", m2b: "#501848",
+      m3a: "#581858", m3b: "#300830",
+      birds: "#6a2858",
+    },
+    {
+      name: "Matcha Berry", emoji: "🍇", price: "23.00", label: "Matcha Berry Blend",
+      hue: 158, sat: 42,
+      sky1: "#dce8e4", sky2: "#c8e0e8", sun: "#98d8b8",
+      m1a: "#48a07a", m1b: "#287858",
+      m2a: "#2e6888", m2b: "#164868",
+      m3a: "#1c5060", m3b: "#0a2838",
+      birds: "#284858",
+    },
+  ];
+
+  let current = 0, cartCount = 1;
+
+  const root        = document.documentElement;
+  const flavorName  = document.getElementById('flavor-name');
+  const priceEl     = document.getElementById('price');
+  const labelName   = document.getElementById('bag-label-name');
+  const labelPrice  = document.getElementById('bag-label-price');
+  const pkg         = document.getElementById('package');
+  const strip       = document.getElementById('flavor-strip');
+  const zone        = document.getElementById('slide-zone');
+  const cartBadge   = document.getElementById('cart-count');
+  const miniCart    = document.getElementById('mini-cart');
+
+  /* ── CSS var helper ── */
+  function css(prop, val) { root.style.setProperty(prop, val); }
+
+  /* ── SVG stop helper ── */
+  function stop(id) { return document.getElementById(id); }
+
+  /* ── Apply palette ── */
+  function applyPalette(f) {
+    const { hue: h, sat: s } = f;
+
+    /* Page background: 4 shades lighter (lightness 91%) */
+    css('--hue', h);
+    css('--sat', s);
+    css('--bg',          `hsl(${h}, ${s * 0.40}%, 91%)`);
+
+    /* Package: 2 shades darker than bg  (lightness 73%) */
+    css('--pkg',         `hsl(${h}, ${s * 0.72}%, 73%)`);
+    css('--pkg-dark',    `hsl(${h}, ${s * 0.82}%, 63%)`);
+    css('--pkg-light',   `hsl(${h}, ${s * 0.58}%, 80%)`);
+
+    /* Accent */
+    css('--accent',      `hsl(${h}, ${s * 1.20}%, 36%)`);
+    css('--accent-soft', `hsl(${h}, ${s * 0.95}%, 52%)`);
+
+    /* SVG illustration */
+    stop('sky1').setAttribute('stop-color', f.sky1);
+    stop('sky2').setAttribute('stop-color', f.sky2);
+    document.getElementById('sun').setAttribute('fill', f.sun);
+    stop('m1a').setAttribute('stop-color', f.m1a);
+    stop('m1b').setAttribute('stop-color', f.m1b);
+    stop('m2a').setAttribute('stop-color', f.m2a);
+    stop('m2b').setAttribute('stop-color', f.m2b);
+    stop('m3a').setAttribute('stop-color', f.m3a);
+    stop('m3b').setAttribute('stop-color', f.m3b);
+    document.querySelectorAll('#birds path').forEach(p => p.setAttribute('stroke', f.birds));
+    /* Tint bamboo & grass subtly to match */
+    const bambooCol = `hsl(${h}, ${Math.max(s, 30) * 0.9}%, 35%)`;
+    const grassCol  = `hsl(${h}, ${Math.max(s, 30) * 0.8}%, 28%)`;
+    document.querySelectorAll('#bamboo rect, #bamboo path').forEach(el => el.setAttribute('fill', bambooCol));
+    document.querySelectorAll('#grass path').forEach(el => el.setAttribute('fill', grassCol));
+  }
+
+  /* ── Select flavor ── */
+  function selectFlavor(index, skipBounce = false) {
+    current = ((index % flavors.length) + flavors.length) % flavors.length;
+    const f = flavors[current];
+
+    flavorName.textContent = f.name;
+    priceEl.textContent    = f.price;
+    labelName.textContent  = f.label;
+    labelPrice.textContent = '¥' + f.price;
+
+    applyPalette(f);
+
+    document.querySelectorAll('.flavor-card').forEach((card, i) =>
+      card.classList.toggle('active-flavor', i === current)
+    );
+
+    if (!skipBounce) {
+      pkg.classList.remove('pkg-bounce');
+      void pkg.offsetWidth;
+      pkg.classList.add('pkg-bounce');
     }
 
-    function selectFlavor(index, skipBounce = false) {
-      current = ((index % flavors.length) + flavors.length) % flavors.length;
-      const f = flavors[current];
+    centerStrip();
+  }
 
-      flavorName.textContent  = f.name;
-      priceEl.textContent     = f.price;
-      bagLabelName.textContent = f.label;
-      bagLabelPrice.textContent = '¥' + f.price;
+  /* ── Centre strip ── */
+  function centerStrip() {
+    const CARD = 72, GAP = 20, STEP = CARD + GAP;
+    const offset = current * STEP - (strip.parentElement.offsetWidth / 2) + CARD / 2;
+    strip.style.transform = `translateX(${-offset}px)`;
+  }
 
-      applyPalette(f);
+  /* ── Drag / swipe ── */
+  let isDragging = false, startX = 0, dragDelta = 0;
+  const THRESHOLD = 52;
 
-      document.querySelectorAll('.flavor-card').forEach((card, i) => {
-        card.classList.toggle('active-flavor', i === current);
-      });
+  function liveShift(delta) {
+    const STEP = 72 + 20;
+    const base = current * STEP - (strip.parentElement.offsetWidth / 2) + 36;
+    strip.style.transition = 'none';
+    strip.style.transform  = `translateX(${-base + delta * 0.38}px)`;
+  }
 
-      if (!skipBounce) {
-        pkg.classList.remove('pkg-bounce');
-        void pkg.offsetWidth;
-        pkg.classList.add('pkg-bounce');
-      }
+  function commitDrag() {
+    strip.style.transition = 'transform .35s cubic-bezier(.4,0,.2,1)';
+    if      (dragDelta < -THRESHOLD) selectFlavor(current + 1);
+    else if (dragDelta >  THRESHOLD) selectFlavor(current - 1);
+    else centerStrip();
+    dragDelta = 0;
+  }
 
-      centerStrip();
-    }
+  zone.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    isDragging = true; startX = e.clientX; dragDelta = 0;
+    zone.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    dragDelta = e.clientX - startX;
+    liveShift(dragDelta);
+  });
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false; zone.classList.remove('dragging');
+    commitDrag();
+  });
 
-    function centerStrip() {
-      const cardW = 80, gap = 32, step = cardW + gap;
-      const offset = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
-      strip.style.transform = `translateX(${-offset}px)`;
-    }
+  zone.addEventListener('touchstart', e => {
+    isDragging = true; startX = e.touches[0].clientX; dragDelta = 0;
+    e.preventDefault();
+  }, { passive: false });
+  zone.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    dragDelta = e.touches[0].clientX - startX;
+    liveShift(dragDelta);
+    e.preventDefault();
+  }, { passive: false });
+  zone.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    commitDrag();
+  });
 
-    // ── Drag ──
-    let isDragging = false, startX = 0, dragDelta = 0;
-    const THRESHOLD = 55;
+  /* ── Keyboard ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); selectFlavor(current + 1); }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); selectFlavor(current - 1); }
+  });
 
-    zone.addEventListener('mousedown', (e) => {
-      if (e.button !== 0) return;
-      isDragging = true; startX = e.clientX; dragDelta = 0;
-      zone.classList.add('dragging'); e.preventDefault();
-    });
+  /* ── Cart ── */
+  window.toggleCart = () => {
+    cartCount = cartCount === 3 ? 1 : cartCount + 1;
+    cartBadge.textContent = cartCount;
+    miniCart.textContent  = cartCount;
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position:fixed;bottom:2rem;right:2rem;
+      background:#fff;color:#1a2a1a;
+      padding:.9rem 1.4rem;border-radius:20px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.14);
+      display:flex;align-items:center;gap:.6rem;
+      font-size:.85rem;font-weight:600;z-index:999;
+    `;
+    toast.innerHTML = `<span>✅</span><span>Added ${flavors[current].name} to cart</span>`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2200);
+  };
 
-    document.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      dragDelta = e.clientX - startX;
-      const step = 80 + 32;
-      const base = current * step - (strip.parentElement.offsetWidth / 2) + 40;
-      strip.style.transition = 'none';
-      strip.style.transform = `translateX(${-base + dragDelta * 0.35}px)`;
-    });
+  window.selectFlavor = selectFlavor;
 
-    document.addEventListener('mouseup', () => {
-      if (!isDragging) return;
-      isDragging = false; zone.classList.remove('dragging');
-      strip.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      commitDrag();
-    });
-
-    zone.addEventListener('touchstart', (e) => {
-      isDragging = true; startX = e.touches[0].clientX; dragDelta = 0;
-      e.preventDefault();
-    }, { passive: false });
-
-    zone.addEventListener('touchmove', (e) => {
-      if (!isDragging) return;
-      dragDelta = e.touches[0].clientX - startX;
-      const step = 80 + 32;
-      const base = current * step - (strip.parentElement.offsetWidth / 2) + 40;
-      strip.style.transition = 'none';
-      strip.style.transform = `translateX(${-base + dragDelta * 0.35}px)`;
-      e.preventDefault();
-    }, { passive: false });
-
-    zone.addEventListener('touchend', () => {
-      if (!isDragging) return;
-      isDragging = false;
-      strip.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
-      commitDrag();
-    });
-
-    function commitDrag() {
-      if      (dragDelta < -THRESHOLD) selectFlavor(current + 1);
-      else if (dragDelta >  THRESHOLD) selectFlavor(current - 1);
-      else centerStrip();
-      dragDelta = 0;
-    }
-
-    // ── Keyboard ──
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') { e.preventDefault(); selectFlavor(current + 1); }
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); selectFlavor(current - 1); }
-    });
-
-    // ── Cart ──
-    window.toggleCart = function () {
-      cartCount = cartCount === 3 ? 1 : cartCount + 1;
-      cartCountEl.textContent = cartCount;
-      miniCart.textContent = cartCount;
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-10 right-10 bg-white text-[#3a4a20] px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50';
-      toast.innerHTML = `<span>✅</span><span class="font-medium">Added ${flavors[current].name} to cart</span>`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2200);
-    };
-
-    window.selectFlavor = selectFlavor;
-
-    // ── Init ──
-    selectFlavor(0, true);
-    window.addEventListener('resize', centerStrip);
-  })();
-  </script>
+  /* ── Init ── */
+  selectFlavor(0, true);
+  window.addEventListener('resize', centerStrip);
+})();
+</script>
 </body>
 </html>

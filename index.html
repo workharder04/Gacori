@@ -7,62 +7,182 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@700&display=swap');
 
     :root { --green: #4a5c3f; }
-
     body { font-family: 'Inter', system-ui, sans-serif; }
-
     .hero-bg { background: linear-gradient(180deg, #5c6f52 0%, #3f4a37 100%); }
 
-    .cup-container { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
-
-    .flavor-card {
-      transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
-    }
-    .flavor-card:hover {
-      transform: scale(1.15) rotate(4deg);
-      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
-    }
-    .active-flavor {
-      box-shadow: 0 0 0 6px #fff, 0 0 0 8px #4a5c3f;
-      transform: scale(1.1);
-    }
+    /* ── Flavor icon strip ── */
+    .flavor-card { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .flavor-card:hover { transform: scale(1.15) rotate(4deg); box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4); }
+    .active-flavor { box-shadow: 0 0 0 6px #fff, 0 0 0 8px #4a5c3f; transform: scale(1.1); }
     .active-flavor:hover { transform: scale(1.15) rotate(4deg); }
 
-    .drink { transition: background 0.8s ease; }
-
-    .powder {
-      background-image:
-        radial-gradient(circle at 30% 40%, rgba(255,255,255,0.15) 0%, transparent 50%),
-        radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%);
-    }
-
-    /* ── Drag / slide zone ── */
-    #slide-zone {
-      touch-action: pan-y;
-      cursor: grab;
-    }
-    #slide-zone.dragging { cursor: grabbing; }
-
-    /* Cup bounce on flavor change */
-    @keyframes cupBounce {
-      0%   { transform: scale(0.93) translateY(8px); }
-      60%  { transform: scale(1.04) translateY(-4px); }
-      100% { transform: scale(1) translateY(0); }
-    }
-    .cup-bounce { animation: cupBounce 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-
-    /* Drag hint ripple on the icon strip */
-    #drag-hint {
-      transition: opacity 0.4s;
-    }
-
-    /* Slide-track for flavor icons */
     #flavor-strip {
       display: flex;
       gap: 2rem;
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── Drag zone ── */
+    #slide-zone { touch-action: pan-y; cursor: grab; }
+    #slide-zone.dragging { cursor: grabbing; }
+
+    /* ── Package bounce ── */
+    @keyframes pkgBounce {
+      0%   { transform: scale(0.92) translateY(10px) rotate(-1deg); }
+      55%  { transform: scale(1.04) translateY(-6px) rotate(0.5deg); }
+      100% { transform: scale(1) translateY(0) rotate(0deg); }
+    }
+    .pkg-bounce { animation: pkgBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    /* ══════════════════════════════════
+       Tea bag / kraft paper package
+    ═══════════════════════════════════ */
+    .package-scene {
+      position: relative;
+      width: 220px;
+      height: 360px;
+      filter: drop-shadow(0 40px 60px rgba(0,0,0,0.55));
+    }
+
+    /* Background bags (depth) */
+    .bg-bag {
+      position: absolute;
+      bottom: 0;
+      width: 170px;
+      height: 300px;
+      background: #b8926a;
+      border-radius: 6px 6px 14px 14px;
+      opacity: 0.6;
+    }
+    .bg-bag-left  { left: -30px;  transform: rotate(-8deg) translateY(18px); z-index: 1; }
+    .bg-bag-right { right: -30px; transform: rotate(8deg)  translateY(18px); z-index: 1; }
+
+    .bg-bag::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: #a07d58;
+      border-radius: 6px 6px 0 0;
+    }
+
+    /* Main bag */
+    .tea-bag {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 190px;
+      z-index: 10;
+    }
+
+    /* Top sealed fold */
+    .bag-top {
+      width: 100%;
+      height: 58px;
+      background: linear-gradient(180deg, #c8a070 0%, #b8906a 100%);
+      border-radius: 7px 7px 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+    /* fold crease lines */
+    .bag-top::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 130px; height: 2px;
+      background: rgba(0,0,0,0.12);
+      border-radius: 2px;
+    }
+    /* notch at top centre */
+    .bag-notch {
+      position: absolute;
+      top: 10px; left: 50%; transform: translateX(-50%);
+      width: 44px; height: 34px;
+      background: #d4ad80;
+      border-radius: 4px 4px 0 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .bag-notch::after {
+      content: '';
+      position: absolute;
+      inset: 4px 4px 0 4px;
+      background: linear-gradient(180deg, #e8c090, #c89060);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* Bag body */
+    .bag-body {
+      width: 100%;
+      height: 290px;
+      background: linear-gradient(170deg, #d4aa78 0%, #c49060 40%, #b87f50 100%);
+      border-radius: 0 0 14px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Side crease shadows */
+    .bag-body::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.18) 0%, transparent 18%),
+        linear-gradient(to left,  rgba(0,0,0,0.18) 0%, transparent 18%);
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* Illustrated front panel */
+    .bag-panel {
+      position: absolute;
+      top: 12px; left: 10px; right: 10px;
+      height: 218px;
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 2;
+    }
+    .bag-panel svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      transition: none;
+    }
+
+    /* Small text label sticker */
+    .bag-label {
+      position: absolute;
+      bottom: 12px; left: 10px; right: 10px;
+      background: rgba(255,255,255,0.82);
+      border-radius: 4px;
+      padding: 5px 8px;
+      z-index: 3;
+      backdrop-filter: blur(4px);
+    }
+    .bag-label-name {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 10px;
+      color: #3a4a2f;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      display: block;
+    }
+    .bag-label-sub {
+      font-size: 8px;
+      color: #6a7a5f;
+      letter-spacing: 0.04em;
+    }
+
+    /* Shadow under the bag */
+    .bag-shadow-base {
+      position: absolute;
+      bottom: -12px; left: 50%;
+      transform: translateX(-50%);
+      width: 300px; height: 36px;
+      background: radial-gradient(ellipse, rgba(0,0,0,0.45) 0%, transparent 70%);
+      z-index: 0;
     }
   </style>
 </head>
@@ -75,13 +195,11 @@
         <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-[#4a5c3f] font-bold text-xl">📖</div>
         <span class="font-semibold tracking-wider">CASE UI/UX</span>
       </div>
-
       <div class="flex items-center gap-8 text-sm">
         <a href="#" class="hover:text-white/70 transition-colors">Shop</a>
         <a href="#" class="hover:text-white/70 transition-colors">Menu</a>
         <a href="#" class="hover:text-white/70 transition-colors">Locations</a>
       </div>
-
       <div class="flex items-center gap-6">
         <div class="flex gap-4">
           <i class="fa-brands fa-instagram cursor-pointer hover:scale-110 transition"></i>
@@ -102,7 +220,6 @@
       <!-- Header row -->
       <div class="flex items-center justify-between px-10 pt-8">
         <span class="text-4xl font-bold tracking-tighter">kumo</span>
-
         <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl">
           <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-solid fa-grip"></i></div>
           <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-brands fa-instagram"></i></div>
@@ -112,7 +229,6 @@
             <span id="mini-cart" class="absolute -top-1 -right-1 bg-white text-[#4a5c3f] text-[10px] px-1.5 rounded-full font-bold">1</span>
           </div>
         </div>
-
         <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-3 rounded-3xl cursor-pointer">
           <i class="fa-solid fa-location-dot"></i>
           <span class="text-sm font-medium">Gurugram</span>
@@ -122,28 +238,121 @@
       <!-- ── Product Scene (drag zone) ── -->
       <div id="slide-zone" class="relative h-[520px] flex items-end justify-center px-12 pb-12 select-none">
 
-        <!-- Powder Base -->
-        <div id="powder" class="powder absolute bottom-12 left-1/2 -translate-x-1/2 w-96 h-40 bg-[#3a4a2f] rounded-[100px] shadow-inner transition-colors duration-700"></div>
+        <!-- ── Tea Package ── -->
+        <div id="package" class="package-scene">
+          <!-- Depth bags -->
+          <div class="bg-bag bg-bag-left"></div>
+          <div class="bg-bag bg-bag-right"></div>
 
-        <!-- Drink Container -->
-        <div id="cup" class="cup-container relative z-10 w-60">
-          <div class="relative">
-            <!-- Straw -->
-            <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-3 h-20 bg-white/70 rounded-full rotate-12 shadow"></div>
-
-            <!-- Liquid -->
-            <div id="liquid" class="drink relative h-80 w-56 mx-auto bg-gradient-to-b from-emerald-400 via-emerald-700 to-[#2a3a20] rounded-[3.5rem] shadow-2xl border-8 border-white/90 overflow-hidden">
-              <div id="foam" class="absolute top-6 left-4 right-4 h-12 bg-white/90 rounded-[3rem] mix-blend-overlay"></div>
-              <div id="flavor-layer" class="absolute inset-0 transition-all duration-700"></div>
-              <div class="absolute top-20 left-8 w-6 h-8 bg-white/30 rounded-2xl rotate-12"></div>
-              <div class="absolute top-32 right-10 w-7 h-6 bg-white/20 rounded-2xl -rotate-12"></div>
+          <!-- Main bag -->
+          <div class="tea-bag">
+            <div class="bag-top">
+              <div class="bag-notch"></div>
             </div>
+            <div class="bag-body">
+              <!-- Illustration -->
+              <div class="bag-panel">
+                <svg id="bag-art" viewBox="0 0 170 218" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                  <!-- Sky -->
+                  <defs>
+                    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop id="sky1" offset="0%" stop-color="#e8e0d0"/>
+                      <stop id="sky2" offset="100%" stop-color="#d4e8c8"/>
+                    </linearGradient>
+                    <linearGradient id="mtn1Grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop id="m1a" offset="0%" stop-color="#7aaa88"/>
+                      <stop id="m1b" offset="100%" stop-color="#4a7a5a"/>
+                    </linearGradient>
+                    <linearGradient id="mtn2Grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop id="m2a" offset="0%" stop-color="#3a6a5a"/>
+                      <stop id="m2b" offset="100%" stop-color="#1e4a3a"/>
+                    </linearGradient>
+                    <linearGradient id="mtn3Grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop id="m3a" offset="0%" stop-color="#2a5040"/>
+                      <stop id="m3b" offset="100%" stop-color="#0e2e22"/>
+                    </linearGradient>
+                  </defs>
 
-            <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-56 h-8 bg-gradient-to-b from-white/30 to-transparent rounded-b-[3rem]"></div>
+                  <!-- Sky background -->
+                  <rect width="170" height="218" fill="url(#skyGrad)"/>
+
+                  <!-- Sun / moon circle -->
+                  <circle id="sun" cx="130" cy="38" r="16" fill="#f0d890" opacity="0.85"/>
+
+                  <!-- Birds (small silhouettes) -->
+                  <g id="birds" fill="#4a5040" opacity="0.55">
+                    <path d="M42,32 Q45,28 48,32 Q51,28 54,32" stroke="#4a5040" stroke-width="1.2" fill="none"/>
+                    <path d="M60,22 Q63,18 66,22 Q69,18 72,22" stroke="#4a5040" stroke-width="1.1" fill="none"/>
+                    <path d="M78,38 Q80,35 82,38 Q84,35 86,38" stroke="#4a5040" stroke-width="1" fill="none"/>
+                    <path d="M95,28 Q97,25 99,28 Q101,25 103,28" stroke="#4a5040" stroke-width="0.9" fill="none"/>
+                  </g>
+
+                  <!-- Far mountains layer 1 -->
+                  <path id="mtn1" d="M0,105 Q20,65 45,90 Q65,55 90,85 Q110,60 135,80 Q152,65 170,75 L170,218 L0,218 Z" fill="url(#mtn1Grad)" opacity="0.7"/>
+
+                  <!-- Mid mountains layer 2 -->
+                  <path id="mtn2" d="M0,130 Q25,95 55,118 Q80,88 110,112 Q135,92 160,108 L170,102 L170,218 L0,218 Z" fill="url(#mtn2Grad)"/>
+
+                  <!-- Foreground ridge -->
+                  <path id="mtn3" d="M0,158 Q35,138 70,152 Q105,136 145,150 Q158,144 170,148 L170,218 L0,218 Z" fill="url(#mtn3Grad)"/>
+
+                  <!-- Bamboo stalks left -->
+                  <g id="bamboo" opacity="0.9">
+                    <!-- stalk 1 -->
+                    <rect x="8"  y="95"  width="4" height="123" rx="2" fill="#3a6a30"/>
+                    <rect x="8"  y="110" width="14" height="2"  rx="1" fill="#2e5428"/>
+                    <rect x="8"  y="128" width="14" height="2"  rx="1" fill="#2e5428"/>
+                    <rect x="8"  y="146" width="14" height="2"  rx="1" fill="#2e5428"/>
+                    <rect x="8"  y="164" width="14" height="2"  rx="1" fill="#2e5428"/>
+                    <!-- leaves on stalk 1 -->
+                    <path d="M12,112 Q28,100 22,114 Z" fill="#4a8a3a"/>
+                    <path d="M12,130 Q-4,118 6,132 Z"  fill="#4a8a3a"/>
+                    <path d="M12,148 Q30,138 20,152 Z" fill="#4a8a3a"/>
+                    <!-- stalk 2 -->
+                    <rect x="22" y="108" width="3.5" height="110" rx="1.5" fill="#4a7a38"/>
+                    <rect x="22" y="120" width="12"  height="1.5" rx="1" fill="#3a6030"/>
+                    <rect x="22" y="135" width="12"  height="1.5" rx="1" fill="#3a6030"/>
+                    <rect x="22" y="150" width="12"  height="1.5" rx="1" fill="#3a6030"/>
+                    <path d="M25,122 Q38,112 32,124 Z" fill="#5a9a48"/>
+                    <path d="M25,137 Q12,128 18,140 Z" fill="#5a9a48"/>
+                  </g>
+
+                  <!-- Foreground grass tufts -->
+                  <g id="grass" fill="#2a5a30">
+                    <path d="M0,218 Q5,185 2,175 Q8,188 12,178 Q10,192 15,218 Z" opacity="0.9"/>
+                    <path d="M10,218 Q18,190 15,182 Q22,195 28,183 Q24,198 30,218 Z" opacity="0.85"/>
+                    <path d="M140,218 Q145,192 142,184 Q150,196 156,186 Q152,200 158,218 Z" opacity="0.9"/>
+                    <path d="M155,218 Q160,196 158,188 Q165,200 170,190 L170,218 Z" opacity="0.85"/>
+                    <!-- Central taller grass -->
+                    <path d="M72,218 Q76,195 74,188 Q80,200 84,192 Q82,205 88,218 Z" opacity="0.8"/>
+                    <path d="M88,218 Q92,200 90,193 Q96,204 100,196 Q97,208 103,218 Z" opacity="0.8"/>
+                  </g>
+
+                  <!-- Calligraphy text -->
+                  <g id="calli" font-family="'Noto Serif SC', serif" fill="#2a3a28" opacity="0.75">
+                    <text x="148" y="70"  font-size="11" font-weight="700" writing-mode="tb">山</text>
+                    <text x="148" y="82"  font-size="11" font-weight="700" writing-mode="tb">響</text>
+                    <text x="148" y="94"  font-size="11" font-weight="700" writing-mode="tb">韻</text>
+                  </g>
+
+                  <!-- Subtle paper texture overlay -->
+                  <rect width="170" height="218" fill="url(#paperTex)" opacity="0.06"/>
+                </svg>
+              </div>
+
+              <!-- Product label sticker -->
+              <div class="bag-label">
+                <span class="bag-label-name">山響韻 · <span id="bag-label-name">Original Matcha</span></span>
+                <span class="bag-label-sub">Premium · 50g · <span id="bag-label-price">¥19.33</span></span>
+              </div>
+            </div>
           </div>
+
+          <!-- Ground shadow -->
+          <div class="bag-shadow-base"></div>
         </div>
 
-        <!-- Flavor icon strip (clipped) -->
+        <!-- Flavor icon strip -->
         <div class="absolute bottom-28 left-0 right-0 overflow-hidden flex justify-center z-20">
           <div id="flavor-strip">
             <div onclick="selectFlavor(0)" id="flavor-0" class="flavor-card active-flavor bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍵</span></div>
@@ -154,7 +363,7 @@
           </div>
         </div>
 
-        <!-- Product Label -->
+        <!-- Product name + price -->
         <div class="absolute bottom-36 left-1/2 -translate-x-1/2 text-center z-30 pointer-events-none">
           <div id="flavor-name" class="text-5xl font-bold tracking-tighter text-white drop-shadow-md transition-all duration-300">Original</div>
           <div class="flex items-center justify-center gap-2 mt-3">
@@ -173,7 +382,7 @@
     </div>
 
     <!-- Footer hint -->
-    <div id="drag-hint" class="text-center mt-6 text-white/40 text-sm flex items-center justify-center gap-2">
+    <div class="text-center mt-6 text-white/40 text-sm flex items-center justify-center gap-2">
       <i class="fa-solid fa-arrows-left-right text-xs"></i>
       <span>Drag left/right &nbsp;·&nbsp; ← → arrow keys &nbsp;·&nbsp; click a flavor</span>
       <div class="w-px h-3 bg-white/30"></div>
@@ -183,108 +392,184 @@
 
   <script>
   (() => {
+    /* ── Flavor definitions ─────────────────────────────────
+       Each flavor tints the SVG illustration with a palette:
+       sky1/sky2  → background sky gradient
+       sun        → circle colour
+       m1a/m1b    → far mountains
+       m2a/m2b    → mid mountains
+       m3a/m3b    → foreground ridge
+       bamboo/grass → plant colour  (via SVG fill attributes)
+    ─────────────────────────────────────────────────────── */
     const flavors = [
-      { name: "Original",     emoji: "🍵", price: "19.33", color: "linear-gradient(to bottom, #10b981, #166534, #14532d)", powder: "#3a4a2f" },
-      { name: "Strawberry",   emoji: "🍓", price: "21.50", color: "linear-gradient(to bottom, #f43f5e, #9f1239, #4c1d95)", powder: "#5a2a3f" },
-      { name: "Blueberry",    emoji: "🫐", price: "22.00", color: "linear-gradient(to bottom, #3b82f6, #1e40af, #1e3a8a)", powder: "#2a3a5a" },
-      { name: "Cherry",       emoji: "🍒", price: "20.75", color: "linear-gradient(to bottom, #c026d3, #7e22ce, #4c1d95)", powder: "#4a2a5a" },
-      { name: "Matcha Berry", emoji: "🍇", price: "23.00", color: "linear-gradient(to bottom, #22c55e, #166534, #4c1d95)", powder: "#3a4a2f" },
+      {
+        name: "Original", emoji: "🍵", price: "19.33",
+        label: "Original Matcha",
+        sky1: "#e8e0d0", sky2: "#d4e8c8",
+        sun: "#f0d890",
+        m1a: "#7aaa88", m1b: "#4a7a5a",
+        m2a: "#3a6a5a", m2b: "#1e4a3a",
+        m3a: "#2a5040", m3b: "#0e2e22",
+        birds: "#4a5040",
+        bamboo: "#3a6a30", grass: "#2a5a30",
+      },
+      {
+        name: "Strawberry", emoji: "🍓", price: "21.50",
+        label: "Strawberry Matcha",
+        sky1: "#f5e0dc", sky2: "#f8cdd5",
+        sun: "#f8b0a0",
+        m1a: "#d07888", m1b: "#a04858",
+        m2a: "#883058", m2b: "#5a1838",
+        m3a: "#6a1840", m3b: "#3a0820",
+        birds: "#7a3040",
+        bamboo: "#8a3050", grass: "#6a2040",
+      },
+      {
+        name: "Blueberry", emoji: "🫐", price: "22.00",
+        label: "Blueberry Matcha",
+        sky1: "#dce4f0", sky2: "#c8d8f0",
+        sun: "#a8c0f0",
+        m1a: "#6888c0", m1b: "#3858a0",
+        m2a: "#2848a0", m2b: "#103080",
+        m3a: "#1a3080", m3b: "#081858",
+        birds: "#303878",
+        bamboo: "#284890", grass: "#1a3070",
+      },
+      {
+        name: "Cherry", emoji: "🍒", price: "20.75",
+        label: "Cherry Matcha",
+        sky1: "#f0dce8", sky2: "#e8c8d8",
+        sun: "#f0a0c0",
+        m1a: "#c068a0", m1b: "#904870",
+        m2a: "#783068", m2b: "#501848",
+        m3a: "#5a1858", m3b: "#300830",
+        birds: "#6a2858",
+        bamboo: "#802868", grass: "#601850",
+      },
+      {
+        name: "Matcha Berry", emoji: "🍇", price: "23.00",
+        label: "Matcha Berry Blend",
+        sky1: "#dce8d8", sky2: "#c8e0e8",
+        sun: "#a0d8b8",
+        m1a: "#50a078", m1b: "#287858",
+        m2a: "#306888", m2b: "#184868",
+        m3a: "#1e5060", m3b: "#0a2838",
+        birds: "#284850",
+        bamboo: "#287860", grass: "#1e5848",
+      },
     ];
 
     let current = 0;
     let cartCount = 1;
 
-    // ── DOM refs ──
-    const liquid      = document.getElementById('liquid');
     const flavorName  = document.getElementById('flavor-name');
     const priceEl     = document.getElementById('price');
-    const powder      = document.getElementById('powder');
-    const cup         = document.getElementById('cup');
+    const bagLabelName = document.getElementById('bag-label-name');
+    const bagLabelPrice = document.getElementById('bag-label-price');
+    const pkg         = document.getElementById('package');
     const strip       = document.getElementById('flavor-strip');
     const zone        = document.getElementById('slide-zone');
     const cartCountEl = document.getElementById('cart-count');
     const miniCart    = document.getElementById('mini-cart');
 
-    // ── Select flavor ──
+    // SVG gradient stops
+    function stop(id) { return document.getElementById(id); }
+
+    function applyPalette(f) {
+      // Sky
+      stop('sky1').setAttribute('stop-color', f.sky1);
+      stop('sky2').setAttribute('stop-color', f.sky2);
+      // Sun
+      document.getElementById('sun').setAttribute('fill', f.sun);
+      // Mountains
+      stop('m1a').setAttribute('stop-color', f.m1a);
+      stop('m1b').setAttribute('stop-color', f.m1b);
+      stop('m2a').setAttribute('stop-color', f.m2a);
+      stop('m2b').setAttribute('stop-color', f.m2b);
+      stop('m3a').setAttribute('stop-color', f.m3a);
+      stop('m3b').setAttribute('stop-color', f.m3b);
+      // Birds
+      document.getElementById('birds').setAttribute('fill', f.birds);
+      document.querySelectorAll('#birds path').forEach(p => {
+        p.setAttribute('stroke', f.birds);
+      });
+      // Bamboo
+      document.querySelectorAll('#bamboo rect, #bamboo path').forEach(el => {
+        const base = el.tagName === 'rect' ? f.bamboo : f.bamboo;
+        el.setAttribute('fill', base);
+      });
+      // Grass
+      document.querySelectorAll('#grass path').forEach(el => {
+        el.setAttribute('fill', f.grass);
+      });
+    }
+
     function selectFlavor(index, skipBounce = false) {
       current = ((index % flavors.length) + flavors.length) % flavors.length;
       const f = flavors[current];
 
-      liquid.style.background = f.color;
-      powder.style.backgroundColor = f.powder;
-      flavorName.textContent = f.name;
-      priceEl.textContent = f.price;
+      flavorName.textContent  = f.name;
+      priceEl.textContent     = f.price;
+      bagLabelName.textContent = f.label;
+      bagLabelPrice.textContent = '¥' + f.price;
+
+      applyPalette(f);
 
       document.querySelectorAll('.flavor-card').forEach((card, i) => {
         card.classList.toggle('active-flavor', i === current);
       });
 
       if (!skipBounce) {
-        cup.classList.remove('cup-bounce');
-        void cup.offsetWidth; // reflow
-        cup.classList.add('cup-bounce');
+        pkg.classList.remove('pkg-bounce');
+        void pkg.offsetWidth;
+        pkg.classList.add('pkg-bounce');
       }
 
-      // Slide the strip so the active card is centred
       centerStrip();
     }
 
     function centerStrip() {
-      const cards = strip.querySelectorAll('.flavor-card');
-      const cardW = 80;   // w-20
-      const gap   = 32;   // gap-8
-      const step  = cardW + gap;
-      const totalW = flavors.length * step - gap;
+      const cardW = 80, gap = 32, step = cardW + gap;
       const offset = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
       strip.style.transform = `translateX(${-offset}px)`;
     }
 
-    // ── Drag / swipe ──
-    let isDragging = false;
-    let startX     = 0;
-    let dragDelta  = 0;
+    // ── Drag ──
+    let isDragging = false, startX = 0, dragDelta = 0;
     const THRESHOLD = 55;
 
     zone.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
-      isDragging = true;
-      startX = e.clientX;
-      dragDelta = 0;
-      zone.classList.add('dragging');
-      e.preventDefault();
+      isDragging = true; startX = e.clientX; dragDelta = 0;
+      zone.classList.add('dragging'); e.preventDefault();
     });
 
     document.addEventListener('mousemove', (e) => {
       if (!isDragging) return;
       dragDelta = e.clientX - startX;
-      // Live-nudge the strip while dragging
-      const cards = strip.querySelectorAll('.flavor-card');
-      const cardW = 80; const gap = 32; const step = cardW + gap;
-      const base = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
+      const step = 80 + 32;
+      const base = current * step - (strip.parentElement.offsetWidth / 2) + 40;
       strip.style.transition = 'none';
       strip.style.transform = `translateX(${-base + dragDelta * 0.35}px)`;
     });
 
     document.addEventListener('mouseup', () => {
       if (!isDragging) return;
-      isDragging = false;
-      zone.classList.remove('dragging');
+      isDragging = false; zone.classList.remove('dragging');
       strip.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
       commitDrag();
     });
 
     zone.addEventListener('touchstart', (e) => {
-      isDragging = true;
-      startX = e.touches[0].clientX;
-      dragDelta = 0;
+      isDragging = true; startX = e.touches[0].clientX; dragDelta = 0;
       e.preventDefault();
     }, { passive: false });
 
     zone.addEventListener('touchmove', (e) => {
       if (!isDragging) return;
       dragDelta = e.touches[0].clientX - startX;
-      const cardW = 80; const gap = 32; const step = cardW + gap;
-      const base = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
+      const step = 80 + 32;
+      const base = current * step - (strip.parentElement.offsetWidth / 2) + 40;
       strip.style.transition = 'none';
       strip.style.transform = `translateX(${-base + dragDelta * 0.35}px)`;
       e.preventDefault();
@@ -298,13 +583,9 @@
     });
 
     function commitDrag() {
-      if (dragDelta < -THRESHOLD) {
-        selectFlavor(current + 1);
-      } else if (dragDelta > THRESHOLD) {
-        selectFlavor(current - 1);
-      } else {
-        centerStrip();
-      }
+      if      (dragDelta < -THRESHOLD) selectFlavor(current + 1);
+      else if (dragDelta >  THRESHOLD) selectFlavor(current - 1);
+      else centerStrip();
       dragDelta = 0;
     }
 
@@ -319,7 +600,6 @@
       cartCount = cartCount === 3 ? 1 : cartCount + 1;
       cartCountEl.textContent = cartCount;
       miniCart.textContent = cartCount;
-
       const toast = document.createElement('div');
       toast.className = 'fixed bottom-10 right-10 bg-white text-[#3a4a20] px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50';
       toast.innerHTML = `<span>✅</span><span class="font-medium">Added ${flavors[current].name} to cart</span>`;
@@ -327,7 +607,6 @@
       setTimeout(() => toast.remove(), 2200);
     };
 
-    // ── Expose selectFlavor globally for onclick attrs ──
     window.selectFlavor = selectFlavor;
 
     // ── Init ──

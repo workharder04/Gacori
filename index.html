@@ -9,550 +9,472 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@700&display=swap');
 
-    /* ── CSS variables (updated per-flavor via JS) ─────── */
+    /* ── Design tokens (updated per-flavor via JS) ── */
     :root {
-      --hue: 120;
-      --sat: 38;
-
-      /* Page BG  → 4 shades lighter  (lightness ~91%) */
-      --bg:          hsl(var(--hue), calc(var(--sat) * 0.45%), 91%);
-
-      /* Package → 2 shades darker than BG  (lightness ~73%) */
-      --pkg:         hsl(var(--hue), calc(var(--sat) * 0.75%), 73%);
-      --pkg-dark:    hsl(var(--hue), calc(var(--sat) * 0.85%), 63%);
-      --pkg-light:   hsl(var(--hue), calc(var(--sat) * 0.60%), 79%);
-
-      /* Accent for text / ring */
-      --accent:      hsl(var(--hue), calc(var(--sat) * 1.2%), 38%);
-      --accent-soft: hsl(var(--hue), calc(var(--sat) * 0.9%), 55%);
-
-      /* Transition speed */
-      --spd: 0.75s;
+      --hue: 120; --sat: 38;
+      --bg:       hsl(var(--hue), calc(var(--sat) * 0.40%), 91%);
+      --pkg:      hsl(var(--hue), calc(var(--sat) * 0.72%), 73%);
+      --pkg-dark: hsl(var(--hue), calc(var(--sat) * 0.82%), 63%);
+      --pkg-light:hsl(var(--hue), calc(var(--sat) * 0.58%), 80%);
+      --accent:   hsl(var(--hue), calc(var(--sat) * 1.20%), 36%);
+      --accent-s: hsl(var(--hue), calc(var(--sat) * 0.95%), 52%);
+      --spd: 0.72s;
+      /* Arc card size — scales with viewport */
+      --csz: clamp(52px, 11.5vw, 72px);
+      --csz-font: calc(var(--csz) * 0.52);
+      --csz-radius: calc(var(--csz) * 0.30);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background-color: var(--bg);
       transition: background-color var(--spd) cubic-bezier(.4,0,.2,1);
-      min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
-    /* ── Top-level wrapper ── */
-    .page { max-width: 900px; width: 100%; margin: auto; padding: 1.5rem; }
+    /* ──────────────────────────────────────
+       Page wrapper
+    ────────────────────────────────────── */
+    .page {
+      max-width: 900px;
+      width: 100%;
+      margin: auto;
+      padding: clamp(.75rem, 3vw, 1.5rem);
+    }
 
-    /* ── Top bar ── */
+    /* ──────────────────────────────────────
+       Top bar
+    ────────────────────────────────────── */
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 1.75rem;
+      margin-bottom: clamp(1rem, 2.5vw, 1.75rem);
       color: var(--accent);
       transition: color var(--spd) ease;
+      flex-wrap: wrap;
+      gap: .5rem;
     }
-    .topbar a { color: inherit; opacity: .7; font-size: .875rem; text-decoration: none; transition: opacity .2s; }
+    .topbar a {
+      color: inherit; opacity: .65; font-size: clamp(.75rem,.9vw,.875rem);
+      text-decoration: none; transition: opacity .2s;
+    }
     .topbar a:hover { opacity: 1; }
     .topbar .logo-icon {
-      width: 36px; height: 36px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--accent);
-      color: var(--bg);
-      font-size: 1.1rem;
-      font-weight: 700;
-      transition: background var(--spd) ease, color var(--spd) ease;
-    }
-    .cart-bubble {
-      position: relative; cursor: pointer;
-      color: var(--accent);
-      transition: color var(--spd) ease;
-    }
-    .cart-badge {
-      position: absolute; top: -5px; right: -6px;
-      background: #ef4444; color: #fff;
-      font-size: 9px; width: 16px; height: 16px;
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    }
-
-    /* ── Main card ── */
-    .card {
-      background: rgba(255,255,255,0.72);
-      backdrop-filter: blur(20px);
-      border-radius: 28px;
-      border: 1px solid rgba(255,255,255,0.9);
-      box-shadow:
-        0 4px 6px -1px rgba(0,0,0,0.04),
-        0 20px 60px -10px rgba(0,0,0,0.10);
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* ── Card header ── */
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.75rem 2.5rem 0;
-    }
-    .brand-name {
-      font-size: 2.25rem;
-      font-weight: 700;
-      letter-spacing: -.03em;
-      color: var(--accent);
-      transition: color var(--spd) ease;
-    }
-    .pill-group {
-      display: flex; gap: .5rem;
-      background: rgba(0,0,0,0.04);
-      border-radius: 16px;
-      padding: .4rem;
-    }
-    .pill-btn {
-      width: 36px; height: 36px;
+      width: clamp(28px,4vw,36px); height: clamp(28px,4vw,36px);
       border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      color: var(--accent);
-      background: transparent;
-      border: none;
-      font-size: .9rem;
+      background: var(--accent); color: var(--bg);
+      font-size: clamp(.85rem,1.1vw,1.1rem); font-weight: 700;
+      transition: background var(--spd) ease, color var(--spd) ease;
+      flex-shrink: 0;
+    }
+    .topbar .brand-label {
+      font-weight: 600; letter-spacing: .07em;
+      font-size: clamp(.7rem,.85vw,.85rem);
+    }
+    .topbar .nav-links { display: flex; gap: clamp(.75rem,2vw,2rem); }
+    .topbar .right-group { display: flex; align-items: center; gap: clamp(.6rem,1.5vw,1.25rem); }
+    .topbar .socials { display: flex; gap: .7rem; font-size: clamp(.8rem,1vw,.95rem); }
+    .cart-bubble {
+      position: relative; cursor: pointer;
+      color: var(--accent); transition: color var(--spd) ease;
+    }
+    .cart-bubble i { font-size: clamp(1rem,1.5vw,1.3rem); }
+    .cart-badge {
+      position: absolute; top: -5px; right: -7px;
+      background: #ef4444; color: #fff;
+      font-size: 9px; min-width: 16px; height: 16px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      padding: 0 3px;
+    }
+
+    /* ──────────────────────────────────────
+       Main card
+    ────────────────────────────────────── */
+    .card {
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(20px);
+      border-radius: clamp(16px,3vw,28px);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,.04), 0 20px 60px -10px rgba(0,0,0,.10);
+      overflow: hidden;
+    }
+
+    /* Card header */
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: clamp(1rem,2.5vw,1.75rem) clamp(1rem,3vw,2.5rem) 0;
+      flex-wrap: wrap; gap: .5rem;
+    }
+    .brand-name {
+      font-size: clamp(1.5rem,3.5vw,2.25rem);
+      font-weight: 700; letter-spacing: -.03em;
+      color: var(--accent); transition: color var(--spd) ease;
+    }
+    .pill-group {
+      display: flex; gap: .35rem;
+      background: rgba(0,0,0,.04); border-radius: 14px; padding: .35rem;
+    }
+    .pill-btn {
+      width: clamp(30px,3.5vw,36px); height: clamp(30px,3.5vw,36px);
+      border-radius: 9px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--accent); background: transparent; border: none;
+      font-size: clamp(.75rem,.9vw,.9rem);
       transition: background .2s, color var(--spd) ease;
     }
-    .pill-btn:hover { background: rgba(0,0,0,0.06); }
+    .pill-btn:hover { background: rgba(0,0,0,.06); }
+    .pill-btn-cart { position: relative; }
+    .pill-cart-badge {
+      position: absolute; top: -3px; right: -3px;
+      background: var(--accent); color: #fff;
+      font-size: 8px; padding: 1px 3px; border-radius: 4px; font-weight: 700;
+      transition: background var(--spd) ease;
+    }
     .location-chip {
       display: flex; align-items: center; gap: .4rem;
-      background: rgba(0,0,0,0.05);
-      border-radius: 50px;
-      padding: .5rem 1.1rem;
-      font-size: .8rem;
-      font-weight: 500;
-      color: var(--accent);
-      cursor: pointer;
+      background: rgba(0,0,0,.05); border-radius: 50px;
+      padding: .4rem clamp(.6rem,1.5vw,1.1rem);
+      font-size: clamp(.7rem,.85vw,.8rem); font-weight: 500;
+      color: var(--accent); cursor: pointer;
       transition: color var(--spd) ease, background .2s;
     }
-    .location-chip:hover { background: rgba(0,0,0,0.09); }
+    .location-chip:hover { background: rgba(0,0,0,.09); }
 
-    /* ── Product scene ── */
+    /* ──────────────────────────────────────
+       Product scene (drag zone)
+    ────────────────────────────────────── */
     .scene {
       position: relative;
-      height: 500px;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 3rem;
-      cursor: grab;
-      user-select: none;
+      height: clamp(380px, 56vw, 520px);
+      display: flex; align-items: flex-end; justify-content: center;
+      cursor: grab; user-select: none; overflow: hidden;
     }
     .scene.dragging { cursor: grabbing; }
 
-    /* Soft coloured glow behind the package */
+    /* Radial glow behind package */
     .scene-glow {
       position: absolute;
-      bottom: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 340px; height: 200px;
-      background: radial-gradient(ellipse at center,
-        var(--pkg-light) 0%,
-        transparent 70%);
-      border-radius: 50%;
-      opacity: .55;
+      bottom: clamp(130px,22vw,165px);
+      left: 50%; transform: translateX(-50%);
+      width: clamp(220px,44vw,360px);
+      height: clamp(120px,20vw,200px);
+      background: radial-gradient(ellipse at center, var(--pkg-light) 0%, transparent 70%);
+      border-radius: 50%; opacity: .5;
       transition: background var(--spd) ease;
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
 
-    /* ── Package ────────────────────────────────────────── */
+    /* ──────────────────────────────────────
+       Tea Package
+    ────────────────────────────────────── */
     .package-scene {
-      position: relative;
-      width: 210px;
-      height: 340px;
+      position: absolute;
+      bottom: clamp(140px,24vw,180px);
+      left: 50%; transform: translateX(-50%);
+      width: clamp(150px,22vw,215px);
+      height: clamp(260px,38vw,345px);
       z-index: 5;
-      filter: drop-shadow(0 32px 48px rgba(0,0,0,0.18));
+      filter: drop-shadow(0 clamp(16px,3vw,32px) clamp(24px,5vw,48px) rgba(0,0,0,.18));
     }
 
     /* Back bags */
     .bg-bag {
-      position: absolute;
-      bottom: 0;
-      width: 165px;
-      height: 290px;
+      position: absolute; bottom: 0;
+      width: 85%; height: 87%;
       border-radius: 6px 6px 14px 14px;
       background-color: var(--pkg-dark);
-      transition: background-color var(--spd) ease;
-      opacity: .50;
+      transition: background-color var(--spd) ease; opacity: .45;
     }
     .bg-bag::before {
       content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 50px;
-      background-color: var(--pkg-dark);
-      filter: brightness(.88);
+      position: absolute; top: 0; left: 0; right: 0; height: 48px;
+      background-color: var(--pkg-dark); filter: brightness(.88);
       border-radius: 6px 6px 0 0;
       transition: background-color var(--spd) ease;
     }
-    .bg-bag-left  { left: -25px; transform: rotate(-7deg) translateY(16px); z-index: 1; }
-    .bg-bag-right { right: -25px; transform: rotate(7deg)  translateY(16px); z-index: 1; }
+    .bg-bag-left  { left: -8%; transform: rotate(-7deg) translateY(15px); z-index: 1; }
+    .bg-bag-right { right: -8%; transform: rotate(7deg)  translateY(15px); z-index: 1; }
 
-    /* Main bag */
     .tea-bag {
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 188px;
-      z-index: 10;
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 90%; z-index: 10;
     }
-
-    /* Top fold */
     .bag-top {
-      width: 100%;
-      height: 56px;
+      width: 100%; height: clamp(42px,6vw,56px);
       background-color: var(--pkg-dark);
-      border-radius: 7px 7px 0 0;
-      position: relative;
-      overflow: hidden;
+      border-radius: 7px 7px 0 0; position: relative; overflow: hidden;
       transition: background-color var(--spd) ease;
     }
     .bag-top::after {
-      content: '';
-      position: absolute;
+      content: ''; position: absolute;
       bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 128px; height: 1.5px;
-      background: rgba(0,0,0,0.1);
-      border-radius: 2px;
+      width: 70%; height: 1.5px; background: rgba(0,0,0,.1); border-radius: 2px;
     }
-
-    /* Notch */
     .bag-notch {
-      position: absolute;
-      top: 10px; left: 50%; transform: translateX(-50%);
-      width: 42px; height: 32px;
-      border-radius: 5px 5px 0 0;
-      background-color: var(--pkg-light);
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.14);
+      position: absolute; top: clamp(6px,1vw,10px); left: 50%; transform: translateX(-50%);
+      width: clamp(32px,4.5vw,42px); height: clamp(24px,3.5vw,32px);
+      border-radius: 5px 5px 0 0; background-color: var(--pkg-light);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.14);
       transition: background-color var(--spd) ease;
     }
     .bag-notch::after {
-      content: '';
-      position: absolute;
-      inset: 4px 4px 0;
-      background-color: var(--pkg);
-      border-radius: 3px 3px 0 0;
-      filter: brightness(1.1);
+      content: ''; position: absolute; inset: 4px 4px 0;
+      background-color: var(--pkg); border-radius: 3px 3px 0 0; filter: brightness(1.1);
       transition: background-color var(--spd) ease;
     }
-
-    /* Bag body */
     .bag-body {
-      width: 100%;
-      height: 284px;
-      background-color: var(--pkg);
-      border-radius: 0 0 14px 14px;
-      position: relative;
-      overflow: hidden;
+      width: 100%; height: clamp(220px,32vw,284px);
+      background-color: var(--pkg); border-radius: 0 0 14px 14px;
+      position: relative; overflow: hidden;
       transition: background-color var(--spd) ease;
     }
-    /* Side crease shading */
     .bag-body::before {
-      content: '';
-      position: absolute; inset: 0;
-      background:
-        linear-gradient(to right, rgba(0,0,0,0.13) 0%, transparent 20%),
-        linear-gradient(to left,  rgba(0,0,0,0.13) 0%, transparent 20%);
-      pointer-events: none;
-      z-index: 5;
-      border-radius: 0 0 14px 14px;
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to right,rgba(0,0,0,.13) 0%,transparent 20%),
+                  linear-gradient(to left, rgba(0,0,0,.13) 0%,transparent 20%);
+      pointer-events: none; z-index: 5; border-radius: 0 0 14px 14px;
     }
-    /* Subtle highlight centre */
     .bag-body::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, transparent 40%);
-      pointer-events: none;
-      z-index: 4;
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom,rgba(255,255,255,.18) 0%,transparent 40%);
+      pointer-events: none; z-index: 4;
     }
-
-    /* Illustration panel */
     .bag-panel {
       position: absolute;
-      top: 12px; left: 10px; right: 10px;
-      height: 214px;
-      border-radius: 5px;
-      overflow: hidden;
-      z-index: 2;
-      background: rgba(255,255,255,0.22);
+      top: clamp(8px,1.2vw,12px); bottom: clamp(8px,1.2vw,12px);
+      left: clamp(6px,1vw,10px); right: clamp(6px,1vw,10px);
+      border-radius: 5px; overflow: hidden; z-index: 2;
+      background: rgba(255,255,255,.22);
     }
     .bag-panel svg { width: 100%; height: 100%; display: block; }
-
-    /* Label sticker */
-    .bag-label {
-      position: absolute;
-      bottom: 12px; left: 10px; right: 10px;
-      background: rgba(255,255,255,0.78);
-      border-radius: 5px;
-      padding: 5px 8px;
-      z-index: 6;
-      backdrop-filter: blur(6px);
-    }
-    .bag-label-name {
-      font-family: 'Noto Serif SC', serif;
-      font-size: 9.5px;
-      color: var(--accent);
-      font-weight: 700;
-      letter-spacing: .05em;
-      display: block;
-      transition: color var(--spd) ease;
-    }
-    .bag-label-sub { font-size: 8px; color: #888; letter-spacing: .04em; }
-
-    /* Ground shadow */
     .bag-shadow-base {
-      position: absolute;
-      bottom: -14px; left: 50%;
-      transform: translateX(-50%);
-      width: 260px; height: 32px;
-      background: radial-gradient(ellipse, rgba(0,0,0,0.22) 0%, transparent 70%);
+      position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+      width: 130%; height: clamp(20px,3vw,32px);
+      background: radial-gradient(ellipse,rgba(0,0,0,.20) 0%,transparent 70%);
       z-index: 0;
     }
 
-    /* ── Package bounce ── */
+    /* Package bounce */
     @keyframes pkgBounce {
-      0%   { transform: scale(.92) translateY(10px); }
-      55%  { transform: scale(1.04) translateY(-5px); }
-      100% { transform: scale(1)   translateY(0); }
+      0%   { transform: translateX(-50%) scale(.92) translateY(10px); }
+      55%  { transform: translateX(-50%) scale(1.04) translateY(-5px); }
+      100% { transform: translateX(-50%) scale(1) translateY(0); }
     }
     .pkg-bounce { animation: pkgBounce .5s cubic-bezier(.4,0,.2,1) forwards; }
 
-    /* ── Flavor strip ── */
-    .strip-wrap {
-      position: absolute;
-      bottom: 6.5rem;
-      left: 0; right: 0;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      z-index: 20;
-    }
-    #flavor-strip {
-      display: flex;
-      gap: 1.25rem;
-      transition: transform .35s cubic-bezier(.4,0,.2,1);
-    }
-    .flavor-card {
-      width: 72px; height: 72px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.85);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.10);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      font-size: 2.2rem;
-      flex-shrink: 0;
-      transition: transform .35s cubic-bezier(.4,0,.2,1),
-                  box-shadow .35s ease,
-                  outline-color var(--spd) ease;
-      outline: 3px solid transparent;
-      outline-offset: 3px;
-    }
-    .flavor-card:hover { transform: scale(1.12) rotate(4deg); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
-    .active-flavor {
-      outline: 3px solid var(--accent);
-      transform: scale(1.1);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.16);
-      transition: outline-color var(--spd) ease, transform .35s ease, box-shadow .35s ease;
-    }
-    .active-flavor:hover { transform: scale(1.14) rotate(3deg); }
-
-    /* ── Product label block ── */
+    /* ──────────────────────────────────────
+       Product label
+    ────────────────────────────────────── */
     .product-label {
       position: absolute;
-      bottom: 10.5rem;
+      bottom: clamp(120px,20vw,155px);
       left: 50%; transform: translateX(-50%);
-      text-align: center;
-      z-index: 30;
-      pointer-events: none;
-      white-space: nowrap;
+      text-align: center; z-index: 30;
+      pointer-events: none; white-space: nowrap;
     }
     .product-label h2 {
-      font-size: 2.8rem;
-      font-weight: 700;
-      letter-spacing: -.025em;
-      color: var(--accent);
-      transition: color var(--spd) ease;
-      line-height: 1;
+      font-size: clamp(1.6rem,4vw,2.8rem);
+      font-weight: 700; letter-spacing: -.025em;
+      color: var(--accent); transition: color var(--spd) ease; line-height: 1;
     }
     .price-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: .4rem;
-      background: var(--accent);
-      color: #fff;
-      font-size: .72rem;
-      font-weight: 700;
-      padding: .45rem 1.1rem;
-      border-radius: 50px;
-      margin-top: .7rem;
-      pointer-events: auto;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--accent); color: #fff;
+      font-size: clamp(.65rem,.85vw,.72rem); font-weight: 700;
+      padding: .4rem clamp(.7rem,1.5vw,1.1rem);
+      border-radius: 50px; margin-top: .6rem;
+      pointer-events: auto; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,.14);
       transition: background var(--spd) ease, box-shadow .2s;
     }
-    .price-chip:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .price-chip:hover { box-shadow: 0 6px 20px rgba(0,0,0,.2); }
 
-    /* ── Bottom headline ── */
-    .scene-headline {
+    /* ──────────────────────────────────────
+       Arc Carousel  ← the circular selector
+    ────────────────────────────────────── */
+    .arc-carousel {
       position: absolute;
-      bottom: 1.25rem;
+      bottom: 0; left: 0; right: 0;
+      height: clamp(110px, 18vw, 145px);
+      z-index: 20;
+      pointer-events: none;             /* cards re-enable it individually */
+    }
+
+    /* The "wheel" pivot — cards are placed relative to its centre-bottom */
+    .arc-track {
+      position: absolute;
+      bottom: clamp(.5rem, 1.2vw, .9rem);
+      left: 0; right: 0;
+      height: clamp(110px, 18vw, 145px);
+      perspective: clamp(500px, 90vw, 900px);
+      perspective-origin: 50% 100%;
+    }
+
+    .arc-card {
+      position: absolute;
+      /* anchor each card at bottom-centre of track; JS shifts it */
+      bottom: 0;
+      left: 50%;
+      width: var(--csz); height: var(--csz);
+      border-radius: var(--csz-radius);
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 4px 16px rgba(0,0,0,.11);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--csz-font);
+      cursor: pointer;
+      pointer-events: auto;
+      will-change: transform, opacity;
+      /* JS toggles transition on/off for drag vs snap */
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      /* ring: colour transitions with accent */
+      outline: 3px solid transparent;
+      outline-offset: 3px;
+      transition:
+        outline-color var(--spd) ease,
+        box-shadow .3s ease;
+    }
+
+    /* Caption below the active card */
+    .arc-caption {
+      position: absolute;
+      bottom: clamp(.1rem,.5vw,.25rem);
       left: 50%; transform: translateX(-50%);
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: .18em;
-      text-transform: uppercase;
-      color: var(--accent-soft);
-      opacity: .7;
-      pointer-events: none;
-      white-space: nowrap;
+      font-size: clamp(.6rem,.75vw,.7rem);
+      font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--accent-s); opacity: .6;
+      white-space: nowrap; pointer-events: none;
       transition: color var(--spd) ease;
     }
 
-    /* ── Footer hint ── */
+    /* ──────────────────────────────────────
+       Footer hint
+    ────────────────────────────────────── */
     .hint {
-      text-align: center;
-      margin-top: 1.25rem;
-      font-size: .75rem;
-      color: var(--accent);
-      opacity: .45;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .6rem;
+      text-align: center; margin-top: clamp(.6rem,1.5vw,1.25rem);
+      font-size: clamp(.65rem,.75vw,.75rem);
+      color: var(--accent); opacity: .42;
+      display: flex; align-items: center; justify-content: center;
+      gap: .55rem; flex-wrap: wrap;
       transition: color var(--spd) ease;
     }
-    .hint-divider { width: 1px; height: 10px; background: currentColor; opacity: .4; }
-    .hint span.reset { cursor: pointer; opacity: .5; }
-    .hint span.reset:hover { opacity: .85; }
+    .hint-div { width: 1px; height: 10px; background: currentColor; opacity: .4; }
+    .hint .reset { cursor: pointer; opacity: .5; }
+    .hint .reset:hover { opacity: .85; }
+
+    /* ──────────────────────────────────────
+       Mobile tweaks
+    ────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .topbar .nav-links { display: none; }
+      .topbar .socials   { display: none; }
+      .location-chip span { display: none; }
+      .topbar .brand-label { display: none; }
+    }
   </style>
 </head>
 <body>
 <div class="page">
 
   <!-- ── Top bar ── -->
-  <div class="topbar">
-    <div style="display:flex;align-items:center;gap:.6rem;">
-      <div class="logo-icon">📖</div>
-      <span style="font-weight:600;letter-spacing:.07em;font-size:.85rem;">CASE UI/UX</span>
+  <header class="topbar" role="banner">
+    <div style="display:flex;align-items:center;gap:.55rem;flex-shrink:0;">
+      <div class="logo-icon" aria-hidden="true">📖</div>
+      <span class="brand-label">CASE UI/UX</span>
     </div>
-
-    <div style="display:flex;gap:2rem;">
+    <nav class="nav-links" aria-label="Main">
       <a href="#">Shop</a>
       <a href="#">Menu</a>
       <a href="#">Locations</a>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:1.25rem;">
-      <div style="display:flex;gap:.9rem;font-size:.95rem;color:var(--accent);transition:color var(--spd) ease;">
-        <i class="fa-brands fa-instagram" style="cursor:pointer;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"></i>
-        <i class="fa-brands fa-tiktok"    style="cursor:pointer;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"></i>
-        <i class="fa-brands fa-x-twitter" style="cursor:pointer;opacity:.7;transition:opacity .2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.7"></i>
+    </nav>
+    <div class="right-group">
+      <div class="socials" aria-label="Social links">
+        <i class="fa-brands fa-instagram" style="cursor:pointer;opacity:.65;" aria-label="Instagram"></i>
+        <i class="fa-brands fa-tiktok"    style="cursor:pointer;opacity:.65;" aria-label="TikTok"></i>
+        <i class="fa-brands fa-x-twitter" style="cursor:pointer;opacity:.65;" aria-label="Twitter"></i>
       </div>
-      <div class="cart-bubble" onclick="toggleCart()">
-        <i class="fa-solid fa-cart-shopping" style="font-size:1.3rem;"></i>
-        <span id="cart-count" class="cart-badge">1</span>
-      </div>
-      <span style="font-size:.8rem;font-weight:600;color:var(--accent);transition:color var(--spd) ease;">
+      <button class="cart-bubble" onclick="toggleCart()" aria-label="Shopping cart">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span id="cart-count" class="cart-badge" aria-live="polite">1</span>
+      </button>
+      <span style="font-size:clamp(.7rem,.85vw,.8rem);font-weight:600;color:var(--accent);transition:color var(--spd) ease;white-space:nowrap;">
         KRIS <span style="color:#ef4444;">♥</span>
       </span>
     </div>
-  </div>
+  </header>
 
   <!-- ── Main card ── -->
-  <div class="card">
+  <main class="card" role="main">
 
-    <!-- Card header -->
     <div class="card-header">
       <span class="brand-name">kumo</span>
 
-      <div class="pill-group">
-        <button class="pill-btn"><i class="fa-solid fa-grip"></i></button>
-        <button class="pill-btn"><i class="fa-brands fa-instagram"></i></button>
-        <button class="pill-btn"><i class="fa-brands fa-x-twitter"></i></button>
-        <button class="pill-btn" onclick="toggleCart()" style="position:relative;">
+      <div class="pill-group" role="toolbar" aria-label="Actions">
+        <button class="pill-btn" aria-label="Grid view"><i class="fa-solid fa-grip"></i></button>
+        <button class="pill-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></button>
+        <button class="pill-btn" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></button>
+        <button class="pill-btn pill-btn-cart" onclick="toggleCart()" aria-label="Cart">
           <i class="fa-solid fa-cart-shopping"></i>
-          <span id="mini-cart" style="position:absolute;top:-4px;right:-4px;background:var(--accent);color:#fff;font-size:9px;padding:1px 4px;border-radius:50px;font-weight:700;transition:background var(--spd) ease;">1</span>
+          <span id="mini-cart" class="pill-cart-badge" aria-live="polite">1</span>
         </button>
       </div>
 
-      <div class="location-chip">
+      <div class="location-chip" role="button" aria-label="Location: Gurugram">
         <i class="fa-solid fa-location-dot" style="font-size:.75rem;"></i>
         <span>Gurugram</span>
       </div>
     </div>
 
-    <!-- ── Product scene ── -->
-    <div class="scene" id="slide-zone">
+    <!-- ── Drag / scene ── -->
+    <div class="scene" id="slide-zone" role="region" aria-label="Flavor selector">
 
-      <!-- Coloured glow behind package -->
-      <div class="scene-glow"></div>
+      <div class="scene-glow" aria-hidden="true"></div>
 
-      <!-- ── Tea Package ── -->
-      <div class="package-scene" id="package">
-
-        <!-- Depth bags -->
-        <div class="bg-bag bg-bag-left"></div>
-        <div class="bg-bag bg-bag-right"></div>
-
-        <!-- Hero bag -->
+      <!-- Tea Package -->
+      <div class="package-scene" id="package" aria-label="Tea package" aria-live="polite">
+        <div class="bg-bag bg-bag-left"  aria-hidden="true"></div>
+        <div class="bg-bag bg-bag-right" aria-hidden="true"></div>
         <div class="tea-bag">
-          <div class="bag-top">
-            <div class="bag-notch"></div>
-          </div>
+          <div class="bag-top"><div class="bag-notch"></div></div>
           <div class="bag-body">
-            <!-- Illustration -->
             <div class="bag-panel">
-              <svg id="bag-art" viewBox="0 0 168 214" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <svg id="bag-art" viewBox="0 0 168 214" xmlns="http://www.w3.org/2000/svg"
+                   preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                 <defs>
                   <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
-                    <stop id="sky1" offset="0%"   stop-color="#e8e0d0"/>
-                    <stop id="sky2" offset="100%" stop-color="#d4e8c8"/>
+                    <stop id="sky1" offset="0%"   stop-color="#e8efe0"/>
+                    <stop id="sky2" offset="100%" stop-color="#d0e8c0"/>
                   </linearGradient>
                   <linearGradient id="m1G" x1="0" y1="0" x2="0" y2="1">
-                    <stop id="m1a" offset="0%"   stop-color="#7aaa88"/>
-                    <stop id="m1b" offset="100%" stop-color="#4a7a5a"/>
+                    <stop id="m1a" offset="0%"   stop-color="#78aa80"/>
+                    <stop id="m1b" offset="100%" stop-color="#487858"/>
                   </linearGradient>
                   <linearGradient id="m2G" x1="0" y1="0" x2="0" y2="1">
-                    <stop id="m2a" offset="0%"   stop-color="#3a6a5a"/>
-                    <stop id="m2b" offset="100%" stop-color="#1e4a3a"/>
+                    <stop id="m2a" offset="0%"   stop-color="#386858"/>
+                    <stop id="m2b" offset="100%" stop-color="#1c4838"/>
                   </linearGradient>
                   <linearGradient id="m3G" x1="0" y1="0" x2="0" y2="1">
-                    <stop id="m3a" offset="0%"   stop-color="#2a5040"/>
-                    <stop id="m3b" offset="100%" stop-color="#0e2e22"/>
+                    <stop id="m3a" offset="0%"   stop-color="#284e3e"/>
+                    <stop id="m3b" offset="100%" stop-color="#0c2c20"/>
                   </linearGradient>
                 </defs>
-
                 <rect width="168" height="214" fill="url(#skyG)"/>
-
-                <circle id="sun" cx="128" cy="36" r="15" fill="#f0d890" opacity=".85"/>
-
-                <!-- Birds -->
+                <circle id="sun" cx="128" cy="36" r="15" fill="#e8d878" opacity=".85"/>
                 <g id="birds" fill="none" stroke="#4a5040" stroke-width="1.2" opacity=".5">
                   <path d="M40,30 Q43,26 46,30 Q49,26 52,30"/>
                   <path d="M58,20 Q61,17 64,20 Q67,17 70,20"/>
                   <path d="M76,36 Q78,33 80,36 Q82,33 84,36"/>
                   <path d="M93,26 Q95,23 97,26 Q99,23 101,26"/>
                 </g>
-
-                <!-- Mountains -->
                 <path id="mtn1" d="M0,104 Q20,64 44,88 Q63,54 88,84 Q108,58 133,78 Q150,64 168,74 L168,214 L0,214 Z" fill="url(#m1G)" opacity=".7"/>
                 <path id="mtn2" d="M0,128 Q24,94 54,116 Q78,86 108,110 Q132,90 158,106 L168,100 L168,214 L0,214 Z" fill="url(#m2G)"/>
                 <path id="mtn3" d="M0,156 Q34,136 68,150 Q103,134 143,148 Q156,142 168,146 L168,214 L0,214 Z" fill="url(#m3G)"/>
-
-                <!-- Bamboo -->
                 <g id="bamboo">
                   <rect x="7"  y="94"  width="4"  height="120" rx="2"   fill="#3a6a30"/>
                   <rect x="7"  y="108" width="13" height="1.8" rx="1"   fill="#2e5428"/>
@@ -569,8 +491,6 @@
                   <path d="M24,120 Q37,110 31,122 Z" fill="#5a9a48"/>
                   <path d="M24,135 Q11,126 17,138 Z" fill="#5a9a48"/>
                 </g>
-
-                <!-- Grass -->
                 <g id="grass" fill="#2a5a30">
                   <path d="M0,214 Q5,183 2,173 Q8,186 12,176 Q10,190 15,214 Z"/>
                   <path d="M10,214 Q18,188 15,180 Q22,193 28,181 Q24,196 30,214 Z"/>
@@ -579,297 +499,323 @@
                   <path d="M70,214 Q75,193 73,186 Q79,198 83,190 Q81,203 87,214 Z"/>
                   <path d="M86,214 Q91,198 89,191 Q95,202 99,194 Q96,206 102,214 Z"/>
                 </g>
-
-                <!-- Calligraphy -->
                 <g font-family="'Noto Serif SC',serif" font-size="11" font-weight="700"
                    fill="#2a3a28" opacity=".7">
                   <text x="147" y="68"  writing-mode="tb">山</text>
                   <text x="147" y="80"  writing-mode="tb">響</text>
                   <text x="147" y="92"  writing-mode="tb">韻</text>
                 </g>
-
-                <!-- Paper-grain overlay -->
-                <rect width="168" height="214" fill="rgba(255,255,255,0.07)"/>
+                <rect width="168" height="214" fill="rgba(255,255,255,.06)"/>
               </svg>
-            </div>
-
-            <!-- Sticker label -->
-            <div class="bag-label">
-              <span class="bag-label-name">山響韻 · <span id="bag-label-name">Original Matcha</span></span>
-              <span class="bag-label-sub">Premium · 50 g · <span id="bag-label-price">¥19.33</span></span>
             </div>
           </div>
         </div>
-
-        <div class="bag-shadow-base"></div>
-      </div>
-      <!-- /package-scene -->
-
-      <!-- Flavor strip -->
-      <div class="strip-wrap">
-        <div id="flavor-strip">
-          <div onclick="selectFlavor(0)" id="flavor-0" class="flavor-card active-flavor"><span>🍵</span></div>
-          <div onclick="selectFlavor(1)" id="flavor-1" class="flavor-card"><span>🍓</span></div>
-          <div onclick="selectFlavor(2)" id="flavor-2" class="flavor-card"><span>🫐</span></div>
-          <div onclick="selectFlavor(3)" id="flavor-3" class="flavor-card"><span>🍒</span></div>
-          <div onclick="selectFlavor(4)" id="flavor-4" class="flavor-card"><span>🍇</span></div>
-        </div>
+        <div class="bag-shadow-base" aria-hidden="true"></div>
       </div>
 
-      <!-- Product name / price -->
-      <div class="product-label">
+      <!-- Product label -->
+      <div class="product-label" aria-live="polite">
         <h2 id="flavor-name">Original</h2>
-        <div class="price-chip" onclick="toggleCart()">
-          <i class="fa-solid fa-cart-plus"></i>
-          <span id="price">19.33</span>
-        </div>
+        <button class="price-chip" onclick="toggleCart()" aria-label="Add to cart">
+          <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+          <span>¥<span id="price">19.33</span></span>
+        </button>
       </div>
 
-      <!-- Bottom headline -->
-      <div class="scene-headline">Choose your matcha tea</div>
-    </div>
-    <!-- /scene -->
+      <!-- ── Arc Carousel (circular format) ── -->
+      <div class="arc-carousel" id="arc-carousel" role="group" aria-label="Flavor options">
+        <div class="arc-track" id="arc-track">
+          <!-- Cards injected by JS so data stays DRY -->
+        </div>
+        <div class="arc-caption" id="arc-caption" aria-hidden="true">Choose your matcha tea</div>
+      </div>
 
-  </div>
-  <!-- /card -->
+    </div><!-- /scene -->
+
+  </main>
 
   <!-- Hint -->
-  <div class="hint">
-    <i class="fa-solid fa-arrows-left-right" style="font-size:.7rem;"></i>
-    <span>Drag left/right</span>
-    <div class="hint-divider"></div>
-    <span>← → arrow keys</span>
-    <div class="hint-divider"></div>
-    <span>click a flavor</span>
-    <div class="hint-divider"></div>
-    <span class="reset" onclick="selectFlavor(0)">Reset</span>
-  </div>
-</div>
+  <footer class="hint" aria-label="Controls hint">
+    <i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i>
+    <span>Drag</span>
+    <div class="hint-div"></div>
+    <span>← → keys</span>
+    <div class="hint-div"></div>
+    <span>Tap a card</span>
+    <div class="hint-div"></div>
+    <span class="reset" onclick="selectFlavor(0)" role="button" tabindex="0">Reset</span>
+  </footer>
+
+</div><!-- /page -->
 
 <script>
+/* ════════════════════════════════════════════════════════
+   Kumo – Interactive Matcha Tea Selector
+   Arc carousel: cards arranged on a circular arc.
+   Active card = centre, fully opaque, full size.
+   Side cards  = transparent, scaled, rotateY for depth.
+   Drag / touch gives real-time arc rotation feedback.
+════════════════════════════════════════════════════════ */
 (() => {
-  /* ─────────────────────────────────────────
-     Flavors
-     hue/sat define the base colour.
-     BG  = hsl(hue, sat*0.42%, 91%)   ← 4 shades lighter
-     Pkg = hsl(hue, sat*0.72%, 73%)   ← 2 shades darker than BG
-  ───────────────────────────────────────── */
-  const flavors = [
-    {
-      name: "Original",  emoji: "🍵", price: "19.33", label: "Original Matcha",
-      hue: 120, sat: 40,
-      sky1: "#e8efe0", sky2: "#d0e8c0", sun: "#e8d878",
-      m1a: "#78aa80", m1b: "#487858",
-      m2a: "#386858", m2b: "#1c4838",
-      m3a: "#284e3e", m3b: "#0c2c20",
-      birds: "#3a4e38",
-    },
-    {
-      name: "Strawberry", emoji: "🍓", price: "21.50", label: "Strawberry Matcha",
-      hue: 348, sat: 68,
-      sky1: "#f8e4e2", sky2: "#f5cdd0", sun: "#f4a8a0",
-      m1a: "#d07880", m1b: "#a04858",
-      m2a: "#882f55", m2b: "#581835",
-      m3a: "#68183e", m3b: "#380820",
-      birds: "#7a3040",
-    },
-    {
-      name: "Blueberry",  emoji: "🫐", price: "22.00", label: "Blueberry Matcha",
-      hue: 222, sat: 58,
-      sky1: "#dce8f5", sky2: "#c8d8f5", sun: "#a0bcf0",
-      m1a: "#6488c8", m1b: "#3858a8",
-      m2a: "#2848a5", m2b: "#103082",
-      m3a: "#1a3082", m3b: "#081858",
-      birds: "#303880",
-    },
-    {
-      name: "Cherry",  emoji: "🍒", price: "20.75", label: "Cherry Matcha",
-      hue: 288, sat: 46,
-      sky1: "#f0ddf0", sky2: "#e8cae8", sun: "#f0a8d0",
-      m1a: "#c068a8", m1b: "#904878",
-      m2a: "#782868", m2b: "#501848",
-      m3a: "#581858", m3b: "#300830",
-      birds: "#6a2858",
-    },
-    {
-      name: "Matcha Berry", emoji: "🍇", price: "23.00", label: "Matcha Berry Blend",
-      hue: 158, sat: 42,
-      sky1: "#dce8e4", sky2: "#c8e0e8", sun: "#98d8b8",
-      m1a: "#48a07a", m1b: "#287858",
-      m2a: "#2e6888", m2b: "#164868",
-      m3a: "#1c5060", m3b: "#0a2838",
-      birds: "#284858",
-    },
+
+  /* ── Flavor data ────────────────────────────────── */
+  const FLAVORS = [
+    { name:'Original',     price:'19.33', label:'Original Matcha',    hue:120, sat:40,
+      sky1:'#e8efe0', sky2:'#d0e8c0', sun:'#e8d878',
+      m1a:'#78aa80', m1b:'#487858', m2a:'#386858', m2b:'#1c4838', m3a:'#284e3e', m3b:'#0c2c20',
+      birds:'#3a4e38', emoji:'🍵' },
+    { name:'Strawberry',   price:'21.50', label:'Strawberry Matcha',  hue:348, sat:68,
+      sky1:'#f8e4e2', sky2:'#f5cdd0', sun:'#f4a8a0',
+      m1a:'#d07880', m1b:'#a04858', m2a:'#882f55', m2b:'#581835', m3a:'#68183e', m3b:'#380820',
+      birds:'#7a3040', emoji:'🍓' },
+    { name:'Blueberry',    price:'22.00', label:'Blueberry Matcha',   hue:222, sat:58,
+      sky1:'#dce8f5', sky2:'#c8d8f5', sun:'#a0bcf0',
+      m1a:'#6488c8', m1b:'#3858a8', m2a:'#2848a5', m2b:'#103082', m3a:'#1a3082', m3b:'#081858',
+      birds:'#303880', emoji:'🫐' },
+    { name:'Cherry',       price:'20.75', label:'Cherry Matcha',      hue:288, sat:46,
+      sky1:'#f0ddf0', sky2:'#e8cae8', sun:'#f0a8d0',
+      m1a:'#c068a8', m1b:'#904878', m2a:'#782868', m2b:'#501848', m3a:'#581858', m3b:'#300830',
+      birds:'#6a2858', emoji:'🍒' },
+    { name:'Matcha Berry', price:'23.00', label:'Matcha Berry Blend', hue:158, sat:42,
+      sky1:'#dce8e4', sky2:'#c8e0e8', sun:'#98d8b8',
+      m1a:'#48a07a', m1b:'#287858', m2a:'#2e6888', m2b:'#164868', m3a:'#1c5060', m3b:'#0a2838',
+      birds:'#284858', emoji:'🍇' },
   ];
+  const N = FLAVORS.length;
 
-  let current = 0, cartCount = 1;
+  /* ── State ──────────────────────────────────────── */
+  let current   = 0;          // active flavor index (integer)
+  let fracIdx   = 0;          // fractional index during drag
+  let cartCount = 1;
+  let isDragging   = false;
+  let dragStartX   = 0;
+  let dragDeltaX   = 0;
+  let snapRAF      = null;
 
+  /* ── DOM refs ───────────────────────────────────── */
   const root        = document.documentElement;
+  const zone        = document.getElementById('slide-zone');
+  const pkgEl       = document.getElementById('package');
+  const track       = document.getElementById('arc-track');
   const flavorName  = document.getElementById('flavor-name');
   const priceEl     = document.getElementById('price');
-  const labelName   = document.getElementById('bag-label-name');
-  const labelPrice  = document.getElementById('bag-label-price');
-  const pkg         = document.getElementById('package');
-  const strip       = document.getElementById('flavor-strip');
-  const zone        = document.getElementById('slide-zone');
   const cartBadge   = document.getElementById('cart-count');
   const miniCart    = document.getElementById('mini-cart');
 
-  /* ── CSS var helper ── */
-  function css(prop, val) { root.style.setProperty(prop, val); }
+  /* ── Build arc cards ────────────────────────────── */
+  const arcCards = FLAVORS.map((f, i) => {
+    const el = document.createElement('div');
+    el.className  = 'arc-card';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', f.name);
+    el.innerHTML  = `<span aria-hidden="true">${f.emoji}</span>`;
+    el.addEventListener('click',   () => selectFlavor(i));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') selectFlavor(i); });
+    track.appendChild(el);
+    return el;
+  });
 
-  /* ── SVG stop helper ── */
-  function stop(id) { return document.getElementById(id); }
+  /* ── Arc geometry ──────────────────────────────── */
+  /*
+     Cards sit on a circle whose centre is *above* the bottom of
+     the track.  The active card (rel=0) anchors at bottom-centre.
+     Side cards arc upward and outward, giving the "spinning wheel"
+     look.  All measures are recomputed from the live track width,
+     making the layout responsive without media-query breakpoints.
 
-  /* ── Apply palette ── */
+     For card at relative index `rel`:
+       tx = Rh * sin(rel * SPREAD)
+       ty = Rv * (cos(rel * SPREAD) - 1)     ← negative = up
+  */
+  const SPREAD_DEG = 37;   // degrees between adjacent cards on the arc
+
+  function arcGeom() {
+    const W   = track.offsetWidth;
+    const Rh  = Math.min(W * 0.265, 158);  // horizontal radius
+    const Rv  = Math.min(W * 0.090, 58);   // vertical  radius (arc height)
+    const SPREAD = SPREAD_DEG * Math.PI / 180;
+    return { Rh, Rv, SPREAD };
+  }
+
+  /* ── Position all cards for a given fractional index ─ */
+  function positionArc(fi, withTransition) {
+    const { Rh, Rv, SPREAD } = arcGeom();
+    const half = N / 2;
+
+    arcCards.forEach((card, i) => {
+      // Shortest-path relative index on the circular sequence
+      let rel = i - fi;
+      while (rel >  half) rel -= N;
+      while (rel < -half) rel += N;
+
+      const absRel = Math.abs(rel);
+      const angle  = rel * SPREAD;
+
+      // Position on the arc (translateX/Y)
+      const tx = Rh * Math.sin(angle);
+      const ty = Rv * (Math.cos(angle) - 1);  // ≤ 0 → goes up
+
+      // Visual weight: active = 1, sides fade out
+      const scale   = Math.max(0.52, 1 - absRel * 0.145);
+      const opacity = absRel < 0.05 ? 1
+                    : Math.max(0.08, 0.38 - absRel * 0.10);
+      const rotY    = rel * -28;              // 3-D depth rotation
+
+      card.style.transition = withTransition
+        ? 'transform .48s cubic-bezier(.4,0,.2,1), opacity .48s ease, outline-color var(--spd) ease'
+        : 'outline-color var(--spd) ease';
+
+      // translateX(-50%) keeps anchor at left:50% of track
+      card.style.transform =
+        `translateX(calc(-50% + ${tx}px)) translateY(${ty}px) scale(${scale}) rotateY(${rotY}deg)`;
+      card.style.opacity  = opacity;
+      card.style.zIndex   = Math.round(30 - absRel * 5);
+
+      // Active ring
+      const isActive = Math.round(((fi % N) + N) % N) === i;
+      card.style.outlineColor = isActive ? 'var(--accent)' : 'transparent';
+      card.style.boxShadow    = isActive
+        ? '0 8px 28px rgba(0,0,0,.18)'
+        : '0 4px 16px rgba(0,0,0,.11)';
+    });
+  }
+
+  /* ── CSS custom-property palette update ─────────── */
+  function css(p, v) { root.style.setProperty(p, v); }
+  function stopEl(id) { return document.getElementById(id); }
+
   function applyPalette(f) {
     const { hue: h, sat: s } = f;
-
-    /* Page background: 4 shades lighter (lightness 91%) */
     css('--hue', h);
     css('--sat', s);
     css('--bg',          `hsl(${h}, ${s * 0.40}%, 91%)`);
-
-    /* Package: 2 shades darker than bg  (lightness 73%) */
     css('--pkg',         `hsl(${h}, ${s * 0.72}%, 73%)`);
     css('--pkg-dark',    `hsl(${h}, ${s * 0.82}%, 63%)`);
     css('--pkg-light',   `hsl(${h}, ${s * 0.58}%, 80%)`);
-
-    /* Accent */
     css('--accent',      `hsl(${h}, ${s * 1.20}%, 36%)`);
-    css('--accent-soft', `hsl(${h}, ${s * 0.95}%, 52%)`);
+    css('--accent-s',    `hsl(${h}, ${s * 0.95}%, 52%)`);
 
-    /* SVG illustration */
-    stop('sky1').setAttribute('stop-color', f.sky1);
-    stop('sky2').setAttribute('stop-color', f.sky2);
+    stopEl('sky1').setAttribute('stop-color', f.sky1);
+    stopEl('sky2').setAttribute('stop-color', f.sky2);
     document.getElementById('sun').setAttribute('fill', f.sun);
-    stop('m1a').setAttribute('stop-color', f.m1a);
-    stop('m1b').setAttribute('stop-color', f.m1b);
-    stop('m2a').setAttribute('stop-color', f.m2a);
-    stop('m2b').setAttribute('stop-color', f.m2b);
-    stop('m3a').setAttribute('stop-color', f.m3a);
-    stop('m3b').setAttribute('stop-color', f.m3b);
+    stopEl('m1a').setAttribute('stop-color', f.m1a);
+    stopEl('m1b').setAttribute('stop-color', f.m1b);
+    stopEl('m2a').setAttribute('stop-color', f.m2a);
+    stopEl('m2b').setAttribute('stop-color', f.m2b);
+    stopEl('m3a').setAttribute('stop-color', f.m3a);
+    stopEl('m3b').setAttribute('stop-color', f.m3b);
     document.querySelectorAll('#birds path').forEach(p => p.setAttribute('stroke', f.birds));
-    /* Tint bamboo & grass subtly to match */
-    const bambooCol = `hsl(${h}, ${Math.max(s, 30) * 0.9}%, 35%)`;
-    const grassCol  = `hsl(${h}, ${Math.max(s, 30) * 0.8}%, 28%)`;
-    document.querySelectorAll('#bamboo rect, #bamboo path').forEach(el => el.setAttribute('fill', bambooCol));
-    document.querySelectorAll('#grass path').forEach(el => el.setAttribute('fill', grassCol));
+    const bambooC = `hsl(${h}, ${Math.max(s,30) * 0.9}%, 34%)`;
+    const grassC  = `hsl(${h}, ${Math.max(s,30) * 0.8}%, 27%)`;
+    document.querySelectorAll('#bamboo rect,#bamboo path').forEach(e => e.setAttribute('fill', bambooC));
+    document.querySelectorAll('#grass path').forEach(e => e.setAttribute('fill', grassC));
   }
 
-  /* ── Select flavor ── */
+  /* ── Select flavor (snapped integer) ───────────── */
   function selectFlavor(index, skipBounce = false) {
-    current = ((index % flavors.length) + flavors.length) % flavors.length;
-    const f = flavors[current];
+    current = ((index % N) + N) % N;
+    fracIdx = current;
 
+    const f = FLAVORS[current];
     flavorName.textContent = f.name;
     priceEl.textContent    = f.price;
-    labelName.textContent  = f.label;
-    labelPrice.textContent = '¥' + f.price;
-
     applyPalette(f);
-
-    document.querySelectorAll('.flavor-card').forEach((card, i) =>
-      card.classList.toggle('active-flavor', i === current)
-    );
+    positionArc(current, true);
 
     if (!skipBounce) {
-      pkg.classList.remove('pkg-bounce');
-      void pkg.offsetWidth;
-      pkg.classList.add('pkg-bounce');
+      pkgEl.classList.remove('pkg-bounce');
+      void pkgEl.offsetWidth;
+      pkgEl.classList.add('pkg-bounce');
     }
-
-    centerStrip();
   }
 
-  /* ── Centre strip ── */
-  function centerStrip() {
-    const CARD = 72, GAP = 20, STEP = CARD + GAP;
-    const offset = current * STEP - (strip.parentElement.offsetWidth / 2) + CARD / 2;
-    strip.style.transform = `translateX(${-offset}px)`;
+  /* ── Drag / swipe ──────────────────────────────── */
+  const DRAG_PX_PER_STEP = 90;   // pixels to swipe to advance one card
+  const COMMIT_THRESHOLD = 44;
+
+  function dragFrac(deltaX) {
+    // Convert pixel delta to fractional index shift
+    return -deltaX / DRAG_PX_PER_STEP;
   }
 
-  /* ── Drag / swipe ── */
-  let isDragging = false, startX = 0, dragDelta = 0;
-  const THRESHOLD = 52;
-
-  function liveShift(delta) {
-    const STEP = 72 + 20;
-    const base = current * STEP - (strip.parentElement.offsetWidth / 2) + 36;
-    strip.style.transition = 'none';
-    strip.style.transform  = `translateX(${-base + delta * 0.38}px)`;
+  function startDrag(x) {
+    isDragging = true;
+    dragStartX = x;
+    dragDeltaX = 0;
+    zone.classList.add('dragging');
+    if (snapRAF) cancelAnimationFrame(snapRAF);
   }
 
-  function commitDrag() {
-    strip.style.transition = 'transform .35s cubic-bezier(.4,0,.2,1)';
-    if      (dragDelta < -THRESHOLD) selectFlavor(current + 1);
-    else if (dragDelta >  THRESHOLD) selectFlavor(current - 1);
-    else centerStrip();
-    dragDelta = 0;
-  }
-
-  zone.addEventListener('mousedown', e => {
-    if (e.button !== 0) return;
-    isDragging = true; startX = e.clientX; dragDelta = 0;
-    zone.classList.add('dragging'); e.preventDefault();
-  });
-  document.addEventListener('mousemove', e => {
+  function moveDrag(x) {
     if (!isDragging) return;
-    dragDelta = e.clientX - startX;
-    liveShift(dragDelta);
-  });
-  document.addEventListener('mouseup', () => {
-    if (!isDragging) return;
-    isDragging = false; zone.classList.remove('dragging');
-    commitDrag();
-  });
+    dragDeltaX = x - dragStartX;
+    fracIdx    = current + dragFrac(dragDeltaX);
+    positionArc(fracIdx, false);
+  }
 
-  zone.addEventListener('touchstart', e => {
-    isDragging = true; startX = e.touches[0].clientX; dragDelta = 0;
-    e.preventDefault();
-  }, { passive: false });
-  zone.addEventListener('touchmove', e => {
-    if (!isDragging) return;
-    dragDelta = e.touches[0].clientX - startX;
-    liveShift(dragDelta);
-    e.preventDefault();
-  }, { passive: false });
-  zone.addEventListener('touchend', () => {
+  function endDrag() {
     if (!isDragging) return;
     isDragging = false;
-    commitDrag();
-  });
+    zone.classList.remove('dragging');
 
-  /* ── Keyboard ── */
+    if (dragDeltaX < -COMMIT_THRESHOLD)      selectFlavor(current + 1);
+    else if (dragDeltaX > COMMIT_THRESHOLD)  selectFlavor(current - 1);
+    else                                     selectFlavor(current);     // snap back
+
+    dragDeltaX = 0;
+  }
+
+  /* Mouse */
+  zone.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    startDrag(e.clientX); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => moveDrag(e.clientX));
+  document.addEventListener('mouseup',   () => endDrag());
+
+  /* Touch */
+  zone.addEventListener('touchstart', e => {
+    startDrag(e.touches[0].clientX); e.preventDefault();
+  }, { passive: false });
+  zone.addEventListener('touchmove', e => {
+    moveDrag(e.touches[0].clientX); e.preventDefault();
+  }, { passive: false });
+  zone.addEventListener('touchend', () => endDrag());
+
+  /* Keyboard */
   document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') { e.preventDefault(); selectFlavor(current + 1); }
     if (e.key === 'ArrowLeft')  { e.preventDefault(); selectFlavor(current - 1); }
   });
 
-  /* ── Cart ── */
+  /* Resize → recompute arc positions */
+  const ro = new ResizeObserver(() => positionArc(current, false));
+  ro.observe(track);
+
+  /* ── Cart toast ─────────────────────────────────── */
   window.toggleCart = () => {
     cartCount = cartCount === 3 ? 1 : cartCount + 1;
     cartBadge.textContent = cartCount;
     miniCart.textContent  = cartCount;
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-      position:fixed;bottom:2rem;right:2rem;
-      background:#fff;color:#1a2a1a;
-      padding:.9rem 1.4rem;border-radius:20px;
-      box-shadow:0 8px 32px rgba(0,0,0,0.14);
-      display:flex;align-items:center;gap:.6rem;
-      font-size:.85rem;font-weight:600;z-index:999;
-    `;
-    toast.innerHTML = `<span>✅</span><span>Added ${flavors[current].name} to cart</span>`;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2200);
+    const t = document.createElement('div');
+    t.setAttribute('role', 'alert');
+    t.style.cssText =
+      'position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;' +
+      'background:#fff;color:#1a2a1a;padding:.8rem 1.3rem;border-radius:18px;' +
+      'box-shadow:0 8px 32px rgba(0,0,0,.14);display:flex;align-items:center;' +
+      'gap:.55rem;font-size:.84rem;font-weight:600;';
+    t.innerHTML = `<span aria-hidden="true">✅</span><span>Added ${FLAVORS[current].name} to cart</span>`;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2200);
   };
 
+  /* ── Expose for reset button ────────────────────── */
   window.selectFlavor = selectFlavor;
 
-  /* ── Init ── */
+  /* ── Init ───────────────────────────────────────── */
   selectFlavor(0, true);
-  window.addEventListener('resize', centerStrip);
+
 })();
 </script>
 </body>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Carousel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="scene">
+    <div class="carousel-wrapper">
+      <div class="carousel" id="carousel">
+        <div class="card" data-index="0">
+          <div class="card-inner">
+            <div class="card-img" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <span class="card-icon">🌊</span>
+            </div>
+            <div class="card-body">
+              <h3>Ocean Vibes</h3>
+              <p>Dive deep into serenity and calm waters of the open sea.</p>
+              <button class="card-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-index="1">
+          <div class="card-inner">
+            <div class="card-img" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <span class="card-icon">🌺</span>
+            </div>
+            <div class="card-body">
+              <h3>Bloom</h3>
+              <p>Discover the beauty hidden in every petal and season.</p>
+              <button class="card-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-index="2">
+          <div class="card-inner">
+            <div class="card-img" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+              <span class="card-icon">⚡</span>
+            </div>
+            <div class="card-body">
+              <h3>Energy</h3>
+              <p>Harness the raw power that drives the universe forward.</p>
+              <button class="card-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-index="3">
+          <div class="card-inner">
+            <div class="card-img" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+              <span class="card-icon">🌿</span>
+            </div>
+            <div class="card-body">
+              <h3>Nature</h3>
+              <p>Reconnect with the earth and find peace in the wild.</p>
+              <button class="card-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-index="4">
+          <div class="card-inner">
+            <div class="card-img" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+              <span class="card-icon">🔥</span>
+            </div>
+            <div class="card-body">
+              <h3>Passion</h3>
+              <p>Ignite your inner fire and pursue what sets you alive.</p>
+              <button class="card-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-index="5">
+          <div class="card-inner">
+            <div class="card-img" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+              <span class="card-icon">✨</span>
+            </div>
+            <div class="card-body">
+              <h3>Magic</h3>
+              <p>Let wonder guide you through the extraordinary everyday.</p>
+              <button class="card-btn">Explore</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-arrows">
+        <button class="arrow" id="prevBtn" aria-label="Previous">&#8592;</button>
+        <button class="arrow" id="nextBtn" aria-label="Next">&#8594;</button>
+      </div>
+
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <p class="hint">Drag left/right &nbsp;·&nbsp; ← → arrow keys</p>
+  </div>
+
+  <script src="carousel.js"></script>
+</body>
+</html>

@@ -1,100 +1,339 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="kumo">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interactive Carousel</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kumo • Matcha Tea</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+    :root { --green: #4a5c3f; }
+
+    body { font-family: 'Inter', system-ui, sans-serif; }
+
+    .hero-bg { background: linear-gradient(180deg, #5c6f52 0%, #3f4a37 100%); }
+
+    .cup-container { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    .flavor-card {
+      transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    .flavor-card:hover {
+      transform: scale(1.15) rotate(4deg);
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+    }
+    .active-flavor {
+      box-shadow: 0 0 0 6px #fff, 0 0 0 8px #4a5c3f;
+      transform: scale(1.1);
+    }
+    .active-flavor:hover { transform: scale(1.15) rotate(4deg); }
+
+    .drink { transition: background 0.8s ease; }
+
+    .powder {
+      background-image:
+        radial-gradient(circle at 30% 40%, rgba(255,255,255,0.15) 0%, transparent 50%),
+        radial-gradient(circle at 70% 60%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    }
+
+    /* ── Drag / slide zone ── */
+    #slide-zone {
+      touch-action: pan-y;
+      cursor: grab;
+    }
+    #slide-zone.dragging { cursor: grabbing; }
+
+    /* Cup bounce on flavor change */
+    @keyframes cupBounce {
+      0%   { transform: scale(0.93) translateY(8px); }
+      60%  { transform: scale(1.04) translateY(-4px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    .cup-bounce { animation: cupBounce 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    /* Drag hint ripple on the icon strip */
+    #drag-hint {
+      transition: opacity 0.4s;
+    }
+
+    /* Slide-track for flavor icons */
+    #flavor-strip {
+      display: flex;
+      gap: 2rem;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
 </head>
-<body>
-  <div class="scene">
-    <div class="carousel-wrapper">
-      <div class="carousel" id="carousel">
-        <div class="card" data-index="0">
-          <div class="card-inner">
-            <div class="card-img" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-              <span class="card-icon">🌊</span>
-            </div>
-            <div class="card-body">
-              <h3>Ocean Vibes</h3>
-              <p>Dive deep into serenity and calm waters of the open sea.</p>
-              <button class="card-btn">Explore</button>
-            </div>
-          </div>
-        </div>
-        <div class="card" data-index="1">
-          <div class="card-inner">
-            <div class="card-img" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-              <span class="card-icon">🌺</span>
-            </div>
-            <div class="card-body">
-              <h3>Bloom</h3>
-              <p>Discover the beauty hidden in every petal and season.</p>
-              <button class="card-btn">Explore</button>
-            </div>
-          </div>
-        </div>
-        <div class="card" data-index="2">
-          <div class="card-inner">
-            <div class="card-img" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-              <span class="card-icon">⚡</span>
-            </div>
-            <div class="card-body">
-              <h3>Energy</h3>
-              <p>Harness the raw power that drives the universe forward.</p>
-              <button class="card-btn">Explore</button>
-            </div>
-          </div>
-        </div>
-        <div class="card" data-index="3">
-          <div class="card-inner">
-            <div class="card-img" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-              <span class="card-icon">🌿</span>
-            </div>
-            <div class="card-body">
-              <h3>Nature</h3>
-              <p>Reconnect with the earth and find peace in the wild.</p>
-              <button class="card-btn">Explore</button>
-            </div>
-          </div>
-        </div>
-        <div class="card" data-index="4">
-          <div class="card-inner">
-            <div class="card-img" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-              <span class="card-icon">🔥</span>
-            </div>
-            <div class="card-body">
-              <h3>Passion</h3>
-              <p>Ignite your inner fire and pursue what sets you alive.</p>
-              <button class="card-btn">Explore</button>
-            </div>
-          </div>
-        </div>
-        <div class="card" data-index="5">
-          <div class="card-inner">
-            <div class="card-img" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
-              <span class="card-icon">✨</span>
-            </div>
-            <div class="card-body">
-              <h3>Magic</h3>
-              <p>Let wonder guide you through the extraordinary everyday.</p>
-              <button class="card-btn">Explore</button>
-            </div>
-          </div>
-        </div>
+<body class="bg-[#4a5c3f] text-white min-h-screen flex items-center justify-center overflow-hidden">
+  <div class="max-w-5xl w-full mx-auto p-6">
+
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-[#4a5c3f] font-bold text-xl">📖</div>
+        <span class="font-semibold tracking-wider">CASE UI/UX</span>
       </div>
 
-      <div class="nav-arrows">
-        <button class="arrow" id="prevBtn" aria-label="Previous">&#8592;</button>
-        <button class="arrow" id="nextBtn" aria-label="Next">&#8594;</button>
+      <div class="flex items-center gap-8 text-sm">
+        <a href="#" class="hover:text-white/70 transition-colors">Shop</a>
+        <a href="#" class="hover:text-white/70 transition-colors">Menu</a>
+        <a href="#" class="hover:text-white/70 transition-colors">Locations</a>
       </div>
 
-      <div class="dots" id="dots"></div>
+      <div class="flex items-center gap-6">
+        <div class="flex gap-4">
+          <i class="fa-brands fa-instagram cursor-pointer hover:scale-110 transition"></i>
+          <i class="fa-brands fa-tiktok cursor-pointer hover:scale-110 transition"></i>
+          <i class="fa-brands fa-x-twitter cursor-pointer hover:scale-110 transition"></i>
+        </div>
+        <div onclick="toggleCart()" class="relative cursor-pointer">
+          <i class="fa-solid fa-cart-shopping text-2xl"></i>
+          <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-[10px] w-4 h-4 rounded-full flex items-center justify-center">1</span>
+        </div>
+        <div class="text-sm font-medium">KRIS ANFALOVA <span class="text-red-400">♥</span></div>
+      </div>
     </div>
 
-    <p class="hint">Drag left/right &nbsp;·&nbsp; ← → arrow keys</p>
+    <!-- Main Card -->
+    <div class="hero-bg rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative">
+
+      <!-- Header row -->
+      <div class="flex items-center justify-between px-10 pt-8">
+        <span class="text-4xl font-bold tracking-tighter">kumo</span>
+
+        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl">
+          <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-solid fa-grip"></i></div>
+          <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-brands fa-instagram"></i></div>
+          <div class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition"><i class="fa-brands fa-x-twitter"></i></div>
+          <div onclick="toggleCart()" class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center cursor-pointer transition relative">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span id="mini-cart" class="absolute -top-1 -right-1 bg-white text-[#4a5c3f] text-[10px] px-1.5 rounded-full font-bold">1</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-5 py-3 rounded-3xl cursor-pointer">
+          <i class="fa-solid fa-location-dot"></i>
+          <span class="text-sm font-medium">Gurugram</span>
+        </div>
+      </div>
+
+      <!-- ── Product Scene (drag zone) ── -->
+      <div id="slide-zone" class="relative h-[520px] flex items-end justify-center px-12 pb-12 select-none">
+
+        <!-- Powder Base -->
+        <div id="powder" class="powder absolute bottom-12 left-1/2 -translate-x-1/2 w-96 h-40 bg-[#3a4a2f] rounded-[100px] shadow-inner transition-colors duration-700"></div>
+
+        <!-- Drink Container -->
+        <div id="cup" class="cup-container relative z-10 w-60">
+          <div class="relative">
+            <!-- Straw -->
+            <div class="absolute -top-8 left-1/2 -translate-x-1/2 w-3 h-20 bg-white/70 rounded-full rotate-12 shadow"></div>
+
+            <!-- Liquid -->
+            <div id="liquid" class="drink relative h-80 w-56 mx-auto bg-gradient-to-b from-emerald-400 via-emerald-700 to-[#2a3a20] rounded-[3.5rem] shadow-2xl border-8 border-white/90 overflow-hidden">
+              <div id="foam" class="absolute top-6 left-4 right-4 h-12 bg-white/90 rounded-[3rem] mix-blend-overlay"></div>
+              <div id="flavor-layer" class="absolute inset-0 transition-all duration-700"></div>
+              <div class="absolute top-20 left-8 w-6 h-8 bg-white/30 rounded-2xl rotate-12"></div>
+              <div class="absolute top-32 right-10 w-7 h-6 bg-white/20 rounded-2xl -rotate-12"></div>
+            </div>
+
+            <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-56 h-8 bg-gradient-to-b from-white/30 to-transparent rounded-b-[3rem]"></div>
+          </div>
+        </div>
+
+        <!-- Flavor icon strip (clipped) -->
+        <div class="absolute bottom-28 left-0 right-0 overflow-hidden flex justify-center z-20">
+          <div id="flavor-strip">
+            <div onclick="selectFlavor(0)" id="flavor-0" class="flavor-card active-flavor bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍵</span></div>
+            <div onclick="selectFlavor(1)" id="flavor-1" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍓</span></div>
+            <div onclick="selectFlavor(2)" id="flavor-2" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🫐</span></div>
+            <div onclick="selectFlavor(3)" id="flavor-3" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍒</span></div>
+            <div onclick="selectFlavor(4)" id="flavor-4" class="flavor-card bg-white text-[#3a4a20] w-20 h-20 rounded-3xl flex items-center justify-center cursor-pointer shadow-xl flex-shrink-0"><span class="text-4xl">🍇</span></div>
+          </div>
+        </div>
+
+        <!-- Product Label -->
+        <div class="absolute bottom-36 left-1/2 -translate-x-1/2 text-center z-30 pointer-events-none">
+          <div id="flavor-name" class="text-5xl font-bold tracking-tighter text-white drop-shadow-md transition-all duration-300">Original</div>
+          <div class="flex items-center justify-center gap-2 mt-3">
+            <div class="bg-white text-[#3a4a20] text-xs font-bold px-4 py-2 rounded-2xl flex items-center gap-2 shadow pointer-events-auto">
+              <i class="fa-solid fa-cart-plus"></i>
+              <span id="price">19.33</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom headline -->
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-4xl font-bold tracking-widest text-white/90 pointer-events-none whitespace-nowrap">
+          Choose your matcha tea
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer hint -->
+    <div id="drag-hint" class="text-center mt-6 text-white/40 text-sm flex items-center justify-center gap-2">
+      <i class="fa-solid fa-arrows-left-right text-xs"></i>
+      <span>Drag left/right &nbsp;·&nbsp; ← → arrow keys &nbsp;·&nbsp; click a flavor</span>
+      <div class="w-px h-3 bg-white/30"></div>
+      <span class="cursor-pointer hover:text-white/70" onclick="selectFlavor(0)">Reset</span>
+    </div>
   </div>
 
-  <script src="carousel.js"></script>
+  <script>
+  (() => {
+    const flavors = [
+      { name: "Original",     emoji: "🍵", price: "19.33", color: "linear-gradient(to bottom, #10b981, #166534, #14532d)", powder: "#3a4a2f" },
+      { name: "Strawberry",   emoji: "🍓", price: "21.50", color: "linear-gradient(to bottom, #f43f5e, #9f1239, #4c1d95)", powder: "#5a2a3f" },
+      { name: "Blueberry",    emoji: "🫐", price: "22.00", color: "linear-gradient(to bottom, #3b82f6, #1e40af, #1e3a8a)", powder: "#2a3a5a" },
+      { name: "Cherry",       emoji: "🍒", price: "20.75", color: "linear-gradient(to bottom, #c026d3, #7e22ce, #4c1d95)", powder: "#4a2a5a" },
+      { name: "Matcha Berry", emoji: "🍇", price: "23.00", color: "linear-gradient(to bottom, #22c55e, #166534, #4c1d95)", powder: "#3a4a2f" },
+    ];
+
+    let current = 0;
+    let cartCount = 1;
+
+    // ── DOM refs ──
+    const liquid      = document.getElementById('liquid');
+    const flavorName  = document.getElementById('flavor-name');
+    const priceEl     = document.getElementById('price');
+    const powder      = document.getElementById('powder');
+    const cup         = document.getElementById('cup');
+    const strip       = document.getElementById('flavor-strip');
+    const zone        = document.getElementById('slide-zone');
+    const cartCountEl = document.getElementById('cart-count');
+    const miniCart    = document.getElementById('mini-cart');
+
+    // ── Select flavor ──
+    function selectFlavor(index, skipBounce = false) {
+      current = ((index % flavors.length) + flavors.length) % flavors.length;
+      const f = flavors[current];
+
+      liquid.style.background = f.color;
+      powder.style.backgroundColor = f.powder;
+      flavorName.textContent = f.name;
+      priceEl.textContent = f.price;
+
+      document.querySelectorAll('.flavor-card').forEach((card, i) => {
+        card.classList.toggle('active-flavor', i === current);
+      });
+
+      if (!skipBounce) {
+        cup.classList.remove('cup-bounce');
+        void cup.offsetWidth; // reflow
+        cup.classList.add('cup-bounce');
+      }
+
+      // Slide the strip so the active card is centred
+      centerStrip();
+    }
+
+    function centerStrip() {
+      const cards = strip.querySelectorAll('.flavor-card');
+      const cardW = 80;   // w-20
+      const gap   = 32;   // gap-8
+      const step  = cardW + gap;
+      const totalW = flavors.length * step - gap;
+      const offset = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
+      strip.style.transform = `translateX(${-offset}px)`;
+    }
+
+    // ── Drag / swipe ──
+    let isDragging = false;
+    let startX     = 0;
+    let dragDelta  = 0;
+    const THRESHOLD = 55;
+
+    zone.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      startX = e.clientX;
+      dragDelta = 0;
+      zone.classList.add('dragging');
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      dragDelta = e.clientX - startX;
+      // Live-nudge the strip while dragging
+      const cards = strip.querySelectorAll('.flavor-card');
+      const cardW = 80; const gap = 32; const step = cardW + gap;
+      const base = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
+      strip.style.transition = 'none';
+      strip.style.transform = `translateX(${-base + dragDelta * 0.35}px)`;
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      zone.classList.remove('dragging');
+      strip.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+      commitDrag();
+    });
+
+    zone.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+      dragDelta = 0;
+      e.preventDefault();
+    }, { passive: false });
+
+    zone.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      dragDelta = e.touches[0].clientX - startX;
+      const cardW = 80; const gap = 32; const step = cardW + gap;
+      const base = current * step - (strip.parentElement.offsetWidth / 2) + cardW / 2;
+      strip.style.transition = 'none';
+      strip.style.transform = `translateX(${-base + dragDelta * 0.35}px)`;
+      e.preventDefault();
+    }, { passive: false });
+
+    zone.addEventListener('touchend', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      strip.style.transition = 'transform 0.35s cubic-bezier(0.4,0,0.2,1)';
+      commitDrag();
+    });
+
+    function commitDrag() {
+      if (dragDelta < -THRESHOLD) {
+        selectFlavor(current + 1);
+      } else if (dragDelta > THRESHOLD) {
+        selectFlavor(current - 1);
+      } else {
+        centerStrip();
+      }
+      dragDelta = 0;
+    }
+
+    // ── Keyboard ──
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); selectFlavor(current + 1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); selectFlavor(current - 1); }
+    });
+
+    // ── Cart ──
+    window.toggleCart = function () {
+      cartCount = cartCount === 3 ? 1 : cartCount + 1;
+      cartCountEl.textContent = cartCount;
+      miniCart.textContent = cartCount;
+
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-10 right-10 bg-white text-[#3a4a20] px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-3 z-50';
+      toast.innerHTML = `<span>✅</span><span class="font-medium">Added ${flavors[current].name} to cart</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2200);
+    };
+
+    // ── Expose selectFlavor globally for onclick attrs ──
+    window.selectFlavor = selectFlavor;
+
+    // ── Init ──
+    selectFlavor(0, true);
+    window.addEventListener('resize', centerStrip);
+  })();
+  </script>
 </body>
 </html>

@@ -1,0 +1,18 @@
+# Claude Code internals
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.pkl
+
+# Data / output
+results.csv
+
+# OS
+.DS_Store

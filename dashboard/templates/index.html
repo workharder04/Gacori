@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network Anomaly Detector</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --danger: #f85149;
+      --warn: #e3b341;
+      --success: #3fb950;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    header {
+      padding: 1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header h1 { font-size: 1.25rem; color: var(--accent); }
+    .pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--success); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem 2rem 0; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; }
+    .card .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .card .value { font-size: 2rem; font-weight: 700; margin-top: .25rem; }
+
+    .charts { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; padding: 1rem 2rem; }
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+    .chart-card h2 { font-size: .9rem; color: var(--muted); margin-bottom: .75rem; }
+
+    .alerts-section { padding: 0 2rem 2rem; }
+    .alerts-section h2 { font-size: .9rem; color: var(--muted); margin-bottom: .75rem; }
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    th { text-align: left; padding: .6rem 1rem; font-size: .75rem; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    td { padding: .6rem 1rem; font-size: .82rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+
+    .badge { display: inline-block; padding: .15rem .5rem; border-radius: 4px; font-size: .7rem; font-weight: 700; }
+    .badge-CRITICAL { background: rgba(248,81,73,.2); color: var(--danger); }
+    .badge-HIGH     { background: rgba(227,179,65,.2); color: var(--warn); }
+    .badge-MEDIUM   { background: rgba(88,166,255,.2); color: var(--accent); }
+    .badge-LOW      { background: rgba(63,185,80,.2);  color: var(--success); }
+
+    .summary-badges { display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .summary-badges span { font-size: .8rem; padding: .2rem .6rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="pulse"></div>
+    <h1>Network Anomaly Detector</h1>
+    <span style="color:var(--muted);font-size:.8rem;margin-left:auto">Live &bull; refreshes every 5s</span>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="label">Total Packets</div>
+      <div class="value" id="total-packets">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Anomalies Detected</div>
+      <div class="value" style="color:var(--danger)" id="total-anomalies">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Anomaly Rate</div>
+      <div class="value" id="anomaly-rate">—</div>
+    </div>
+    <div class="card">
+      <div class="label">Top Talker</div>
+      <div class="value" style="font-size:1.1rem" id="top-talker">—</div>
+    </div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-card">
+      <h2>Anomaly Score Timeline</h2>
+      <canvas id="timeline-chart" height="120"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Top Talkers</h2>
+      <canvas id="talkers-chart" height="120"></canvas>
+    </div>
+  </div>
+
+  <div class="alerts-section">
+    <h2>Recent Alerts</h2>
+    <div class="summary-badges" id="alert-summary"></div>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th><th>Severity</th><th>Src IP</th><th>Dst IP</th><th>Protocol</th><th>Score</th><th>Byte Rate</th>
+        </tr>
+      </thead>
+      <tbody id="alert-tbody">
+        <tr><td colspan="7" style="text-align:center;color:var(--muted)">Waiting for data…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const timelineCtx = document.getElementById('timeline-chart').getContext('2d');
+    const talkersCtx  = document.getElementById('talkers-chart').getContext('2d');
+
+    const timelineChart = new Chart(timelineCtx, {
+      type: 'line',
+      data: { labels: [], datasets: [{
+        label: 'Anomaly Score',
+        data: [],
+        borderColor: '#58a6ff',
+        backgroundColor: 'rgba(88,166,255,.1)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 3,
+        pointBackgroundColor: ctx => ctx.raw < -0.1 ? '#f85149' : '#58a6ff',
+      }]},
+      options: {
+        animation: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#8b949e', maxTicksLimit: 8 }, grid: { color: '#21262d' } },
+          y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+        }
+      }
+    });
+
+    const talkersChart = new Chart(talkersCtx, {
+      type: 'bar',
+      data: { labels: [], datasets: [{ label: 'Packets', data: [], backgroundColor: '#388bfd66', borderColor: '#58a6ff', borderWidth: 1 }] },
+      options: {
+        animation: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+          y: { ticks: { color: '#8b949e', font: { size: 11 } }, grid: { display: false } },
+        }
+      }
+    });
+
+    async function refresh() {
+      const [stats, timeline, alerts, summary] = await Promise.all([
+        fetch('/api/stats').then(r=>r.json()),
+        fetch('/api/timeline').then(r=>r.json()),
+        fetch('/api/alerts').then(r=>r.json()),
+        fetch('/api/alert_summary').then(r=>r.json()),
+      ]);
+
+      document.getElementById('total-packets').textContent = stats.total_packets.toLocaleString();
+      document.getElementById('total-anomalies').textContent = stats.total_anomalies.toLocaleString();
+      document.getElementById('anomaly-rate').textContent = stats.anomaly_rate + '%';
+      document.getElementById('top-talker').textContent = stats.top_talkers[0]?.ip ?? '—';
+
+      timelineChart.data.labels = timeline.map(d=>d.time);
+      timelineChart.data.datasets[0].data = timeline.map(d=>d.score);
+      timelineChart.update('none');
+
+      talkersChart.data.labels = stats.top_talkers.map(t=>t.ip);
+      talkersChart.data.datasets[0].data = stats.top_talkers.map(t=>t.count);
+      talkersChart.update('none');
+
+      const sb = document.getElementById('alert-summary');
+      sb.innerHTML = Object.entries(summary).map(([sev, cnt]) =>
+        `<span class="badge badge-${sev}">${sev}: ${cnt}</span>`
+      ).join('');
+
+      const tbody = document.getElementById('alert-tbody');
+      if (alerts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">No alerts yet</td></tr>';
+      } else {
+        tbody.innerHTML = [...alerts].reverse().slice(0,20).map(a => `
+          <tr>
+            <td>${new Date(a.timestamp*1000).toLocaleTimeString()}</td>
+            <td><span class="badge badge-${a.severity}">${a.severity}</span></td>
+            <td>${a.src_ip}</td>
+            <td>${a.dst_ip}</td>
+            <td>${a.protocol}</td>
+            <td>${a.anomaly_score}</td>
+            <td>${a.details.byte_rate ?? '—'}</td>
+          </tr>`).join('');
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>
